@@ -1,0 +1,572 @@
+openapi: 3.0.0
+info:
+  title: Simple Poker Game
+  version: 0.1.0
+  license: 
+    name: MIT
+    url: https://mit-license.org/
+servers:
+  - url: http://localhost:1975/v0.1.0
+    description: My localhost server.
+paths:
+  /user:
+    post:
+      summary: Create new user (Sign up)
+      tags:
+        - authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        "201":
+          description: User is created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    username:
+                      type: string
+        "400":
+          description: Invalid information.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    error_messages:
+                      type: array
+                      items:
+                        type: string
+  /auth:
+    post:
+      summary: Sign in
+      tags:
+        - authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        "200":
+          description: Sign in success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    access_token:
+                      type: string
+        "400":
+          description: Sign in fail.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    error_messages:
+                      type: array
+                      items:
+                        type: string
+  /game:
+    get:
+      summary: Get all available games
+      tags:
+        - game
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  games:
+                    type: array
+                    items:
+                      type: object
+                      $ref: "#/components/schemas/game"
+        "400":
+          description: Bad request.
+  /room:
+    get:
+      summary: Get all rooms
+      description: Get list of rooms with optional condition.
+      tags:
+        - room
+      parameters:
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: game_id
+          in: query
+          description: Get all rooms of a specific game via game_id
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rooms:
+                    type: array
+                    items:
+                      type: object
+                      $ref: "#/components/schemas/room"
+        "400":
+          description: Missing or invalid required parameters.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    error_messages:
+                      type: array
+                      items:
+                        type: string
+    post:
+      summary: Create new room
+      tags:
+        - room
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+      responses:
+        "201":
+          description: Room is created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room:
+                    $ref: "#/components/schemas/room"
+        "400":
+          description: Invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /room/{id}:
+    get:
+      summary: Get specific room
+      description: Get information related to a specific room.
+      tags:
+        - room
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room:
+                    $ref: "#/components/schemas/room"
+        "400":
+          description: Invalid required parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+    post:
+      security:
+        - bearerAuth: []
+      summary: Join room and mark ready
+      tags:
+        - room
+      parameters:
+        - in: path
+          name: id
+          description: room_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: ready
+          description: Mark ready or not.
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+      responses:
+        "200":
+          description: Join success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room:
+                    $ref: "#/components/schemas/room"
+        "400":
+          description: Invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete specific room
+      tags:
+        - room
+      parameters:
+        - in: path
+          name: id
+          description: room_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+      responses:
+        "200":
+          description: Room is deleted.
+        "400":
+          description: Invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  /table/{id}:
+    get:
+      summary: Get specific table information
+      description: |
+        Players get information about their table and their own current state
+        via this endpoint.
+      tags:
+        - table
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: user_id
+          description: |
+            If users provide their id, it will return some information related to
+            users (mark with (*)). Else, just return general information.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/table"
+        "400": 
+          description: Invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    post:
+      summary: Perform action on specific table
+      tags:
+        - table
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [check, call, raise, fold]
+                amount:
+                  description: Amount of money, require if action is "raise".
+                  type: integer
+
+      responses:
+        "200":
+          description: Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/table"
+        "400": 
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+components:
+  schemas:
+    room:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        users:
+          description: All users in room include owner.
+          type: array 
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              ready:
+                type: boolean
+        playing:
+          type: boolean
+        private:
+          type: boolean
+        owner:
+          description: user_id of the owner of the room
+          type: integer
+        table:
+          description: table_id contains information about happening game.
+          type: integer
+    game:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        logo:
+          type: string
+    card:
+      type: object
+      properties:
+        id:
+          type: integer
+        number:
+          description: From A to K (1 to 13).
+          type: integer
+          minimum: 1
+          maximum: 13
+        suit:
+          description: Diamond(0), Heart(1), Club(2), Spade(3).
+          type: integer
+        image:
+          description: URL to card image.
+          type: string
+    table:
+      type: object
+      properties:
+        id:
+          type: integer
+        round:
+          description: Current round.
+          type: integer
+          minimum: 1
+          maximum: 4
+        done:
+          description: Is game done or not.
+          type: boolean
+        pot:
+          description: Total bet money.
+          type: integer
+        common_cards:
+          description: Common cards.
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/card"
+        own_cards:
+          description: (*).
+          type: array
+          maxItems: 2
+          items:
+            $ref: "#/components/schemas/card"
+        best_combination:
+          description: (*).
+          type: object
+          properties:
+            id:
+              description: combination_id.
+              type: integer
+            name:
+              description: Combination name.
+              type: string
+            selected_common_cards:
+              type: array
+              items:
+                $ref: "#/components/schemas/card"
+        current_turn:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              description: who is thinking to make a decision.
+        latest_bet:
+          type: object
+          properties:
+            user_id:
+              description: who perform latest bet.
+              type: integer
+            action:
+              type: object
+              properties:
+                id:
+                  description: action_id.
+                  type: integer
+                name:
+                  description: action_name.
+                  type: string
+                amount:
+                  description: If they raise, how much is it.
+                  type: integer
+        available_action:
+          description: Actions that users can perform according to current
+            state (*).
+          type: object
+          properties:
+            can_fold:
+              type: boolean
+            can_check:
+              type: boolean
+            can_raise:
+              type: boolean
+            can_call:
+              type: boolean
+        players:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                description: user_id.
+                type: integer
+              available_money:
+                type: integer
+        results:
+          type: array
+          description: Final result when the game is done.
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
+              cards:
+                type: array
+                items:
+                  $ref: "#/components/schemas/card"
+        winers:
+          type: array
+          description: List of winers and their winning amount.
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
+              amount:
+                type: integer
+              best_combination:
+                type: object
+                properties:
+                  id:
+                    description: combination_id.
+                    type: integer
+                  name:
+                    description: Combination name.
+                    type: string
+                  selected_common_cards:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/card"
+    errors:
+      type: object
+      properties:
+        error_messages:
+          type: array
+          items:
+            type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errors"
