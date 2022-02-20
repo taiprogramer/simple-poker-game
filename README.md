@@ -4,7 +4,8 @@
 
 This project aims to implement Texas Hold'em game as web-based application.
 
-## Preview OpenAPI document
+## Development
+### Preview OpenAPI document
 
 You can preview OpenAPI document by following these instructions
 
@@ -16,6 +17,10 @@ openapi preview-docs ./doc/poker_v0.1.0.yaml
 ```
 
 Done!
+
+### Preview database schema
+
+You can preview database schema with [pgModeler](https://pgmodeler.io/) tool.
 
 ## Contributing
 
