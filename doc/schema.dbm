@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+ Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.4" use-changelog="false" last-position="730,357" last-zoom="1" max-obj-count="22"
+	 default-schema="public" default-owner="postgres"
+	 layers="Default layer"
+	 active-layers="0"
+	 layer-name-colors="#000000"
+	 layer-rect-colors="#b4b4b4"
+	 show-layer-names="false" show-layer-rects="false">
+<database name="simple_poker" is-template="false" allow-conns="true">
+</database>
+
+<schema name="public" layers="0" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<table name="users" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="800" y="20"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="username">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="hashed_password">
+		<type name="char" length="30"/>
+	</column>
+	<column name="money">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="users_pk" type="pk-constr" table="public.users">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="rooms" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="200" y="20"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="code">
+		<type name="char" length="4"/>
+	</column>
+	<column name="playing">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="private">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="password">
+		<type name="varchar" length="20"/>
+	</column>
+	<constraint name="rooms_pk" type="pk-constr" table="public.rooms">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="users_has_one_rooms" type="rel11" layers="0" alias="User owns one room."
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#edf942"
+	 src-table="public.rooms"
+	 dst-table="public.users"
+	 src-required="false" dst-required="true"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="0.0596771" y="2.82621"/>
+	</label>
+</relationship>
+
+<table name="tables" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="160" y="400"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="round">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="done">
+		<type name="boolean" length="0"/>
+	</column>
+	<column name="pot">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="tables_pk" type="pk-constr" table="public.tables">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="cards" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="500" y="800"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="number">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="suit">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="image">
+		<type name="varchar" length="0"/>
+	</column>
+	<constraint name="cards_pk" type="pk-constr" table="public.cards">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="combinations" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1400" y="820"/>
+	<column name="id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="score">
+		<type name="integer" length="0"/>
+		<comment><![CDATA[Higher is better]]></comment>
+	</column>
+	<constraint name="combinations_pk" type="pk-constr" table="public.combinations">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="actions" layers="0" collapse-mode="2" max-obj-count="2" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1040" y="440"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name">
+		<type name="varchar" length="0"/>
+	</column>
+	<constraint name="actions_pk" type="pk-constr" table="public.actions">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="rooms_has_one_tables" type="rel11" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#602972"
+	 src-table="public.tables"
+	 dst-table="public.rooms"
+	 src-required="false" dst-required="true"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="38.2011" y="-21.877"/>
+	</label>
+</relationship>
+
+<table name="waiting_lists" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Users in room
+]]></comment>
+	<position x="500" y="200"/>
+	<column name="available_money">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="ready">
+		<type name="boolean" length="0"/>
+	</column>
+
+	<customidxs object-type="column">
+		<object name="id_rooms" index="0"/>
+		<object name="id_users" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="rooms_fk" index="0"/>
+		<object name="users_fk" index="1"/>
+		<object name="waiting_lists_pk" index="2"/>
+	</customidxs>
+</table>
+
+<relationship name="rooms_has_many_waiting_lists" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#64d1db"
+	 src-table="public.rooms"
+	 dst-table="public.waiting_lists"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+<relationship name="users_has_many_waiting_lists" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#3f090e"
+	 src-table="public.users"
+	 dst-table="public.waiting_lists"
+	 src-required="false" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="32.1766" y="-17.6824"/>
+	</label>
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<relationship name="many_tables_has_common_cards" type="relnn" layers="0"
+	 src-col-pattern="{sc}_{st}" dst-col-pattern="{sc}_{dt}"
+	 pk-pattern="{gt}_pk" uq-pattern="{gt}_uq"
+	 src-fk-pattern="{st}_fk" dst-fk-pattern="{dt}_fk"
+	 pk-col-pattern="id"
+	 custom-color="#fdc279"
+	 src-table="public.tables"
+	 dst-table="public.cards"
+	 src-required="false" dst-required="false"
+	 table-name="many_tables_has_many_cards"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="8.23693" y="-23.7698"/>
+	</label>
+</relationship>
+
+<relationship name="tables_has_one_current_turn_users" type="rel11" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#fe5aa1"
+	 src-table="public.users"
+	 dst-table="public.tables"
+	 src-required="false" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="-41.2143" y="-29.0643"/>
+	</label>
+</relationship>
+
+<table name="bet_histories" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="700" y="540"/>
+	<column name="id" not-null="true"
+	 identity-type="ALWAYS">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="amount">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="bet_histories_pk" type="pk-constr" table="public.bet_histories">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="id_actions" index="3"/>
+		<object name="id_tables" index="1"/>
+		<object name="id_users" index="2"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="actions_fk" index="2"/>
+		<object name="tables_fk" index="0"/>
+		<object name="users_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="tables_has_many_bet_histories" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#c5ac15"
+	 src-table="public.tables"
+	 dst-table="public.bet_histories"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+<relationship name="users_has_many_bet_histories" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#e0418b"
+	 src-table="public.users"
+	 dst-table="public.bet_histories"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="68.8218" y="197.323"/>
+	</label>
+</relationship>
+
+<relationship name="actions_has_many_bet_histories" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#b2cd4b"
+	 src-table="public.actions"
+	 dst-table="public.bet_histories"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE"/>
+
+<relationship name="many_users_has_many_tables" type="relnn" layers="0"
+	 src-col-pattern="{sc}_{st}" dst-col-pattern="{sc}_{dt}"
+	 pk-pattern="{gt}_pk" uq-pattern="{gt}_uq"
+	 src-fk-pattern="{st}_fk" dst-fk-pattern="{dt}_fk"
+	 pk-col-pattern="id"
+	 custom-color="#ec82d0"
+	 src-table="public.users"
+	 dst-table="public.tables"
+	 src-required="false" dst-required="false"
+	 table-name="many_users_has_many_tables"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="-17.1439" y="-5.53431"/>
+	</label>
+	<column name="available_money">
+		<type name="integer" length="0"/>
+	</column>
+</relationship>
+
+<table name="users_tables_cards" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1020" y="780"/>
+
+	<customidxs object-type="column">
+		<object name="id_cards" index="2"/>
+		<object name="id_tables" index="0"/>
+		<object name="id_users" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="cards_fk" index="3"/>
+		<object name="tables_fk" index="0"/>
+		<object name="users_fk" index="2"/>
+		<object name="users_tables_cards_pk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="tables_has_many_users_tables_cards" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#071230"
+	 src-table="public.tables"
+	 dst-table="public.users_tables_cards"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<relationship name="users_has_many_users_tables_cards" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#59d709"
+	 src-table="public.users"
+	 dst-table="public.users_tables_cards"
+	 src-required="false" dst-required="false"
+	del-action="CASCADE">
+	<constraint name="users_tables_cards_pk" type="pk-constr" alias="users_tables_cards_pk" protected="true" table="public.users_tables_cards">
+		</constraint>
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<relationship name="cards_has_many_users_tables_cards" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#2bfedb"
+	 src-table="public.cards"
+	 dst-table="public.users_tables_cards"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="18.4233" y="7.3321"/>
+	</label>
+	<constraint name="users_tables_cards_pk" type="pk-constr" alias="users_tables_cards_pk" protected="true" table="public.users_tables_cards">
+		</constraint>
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<table name="users_tables_combinations" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1260" y="520"/>
+
+	<customidxs object-type="column">
+		<object name="id_combinations" index="2"/>
+		<object name="id_tables" index="0"/>
+		<object name="id_users" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="combinations_fk" index="0"/>
+		<object name="tables_fk" index="2"/>
+		<object name="users_fk" index="1"/>
+		<object name="users_tables_combinations_pk" index="3"/>
+	</customidxs>
+</table>
+
+<relationship name="combinations_has_many_users_tables_combinations" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#f9e589"
+	 src-table="public.combinations"
+	 dst-table="public.users_tables_combinations"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="75.4587" y="-22.2878"/>
+	</label>
+</relationship>
+
+<relationship name="users_has_many_users_tables_combinations" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#c59cd3"
+	 src-table="public.users"
+	 dst-table="public.users_tables_combinations"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<relationship name="tables_has_many_users_tables_combinations" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#f373a1"
+	 src-table="public.tables"
+	 dst-table="public.users_tables_combinations"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<constraint name="users_tables_combinations_pk" type="pk-constr" alias="users_tables_combinations_pk" protected="true" table="public.users_tables_combinations">
+		</constraint>
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<table name="combination_details" layers="0" collapse-mode="2" max-obj-count="1" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1320" y="280"/>
+	<column name="id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="combination_details_pk" type="pk-constr" table="public.combination_details">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="users_tables_combinations_has_one_combination_details" type="rel11" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#33f6fb"
+	 src-table="public.combination_details"
+	 dst-table="public.users_tables_combinations"
+	 src-required="false" dst-required="false">
+	<label ref-type="name-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
+
+<table name="combination_details_cards" layers="0" collapse-mode="2" max-obj-count="3" z-value="0">
+	<schema name="public"/>
+	<role name="postgres"/>
+	<position x="1640" y="620"/>
+</table>
+
+<relationship name="combination_details_has_many_combination_details_cards" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#3a09c2"
+	 src-table="public.combination_details"
+	 dst-table="public.combination_details_cards"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+<relationship name="cards_has_many_combination_details_cards" type="rel1n" layers="0"
+	 src-col-pattern="{sc}_{st}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#f1d674"
+	 src-table="public.cards"
+	 dst-table="public.combination_details_cards"
+	 src-required="true" dst-required="false"
+	del-action="CASCADE">
+	<constraint name="combination_details_cards_pk" type="pk-constr" alias="combination_details_cards_pk" protected="true" table="public.combination_details_cards">
+		</constraint>
+	<special-pk-cols indexes="0"/>
+</relationship>
+
+</dbmodel>
