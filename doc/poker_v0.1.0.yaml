@@ -42,12 +42,29 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                    error_messages:
-                      type: array
-                      items:
-                        type: string
+                $ref: "#/components/schemas/errors"
+  /user/{id}:
+    get:
+      summary: Get information about user
+      tags:
+        - authentication
+      description: Users get information about them.
+      responses:
+        "200":
+          description: Ok.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/user"
+
+        "400":
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
   /auth:
     post:
       summary: Sign in
@@ -87,30 +104,10 @@ paths:
                       type: array
                       items:
                         type: string
-  /game:
-    get:
-      summary: Get all available games
-      tags:
-        - game
-      responses:
-        "200":
-          description: Ok.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  games:
-                    type: array
-                    items:
-                      type: object
-                      $ref: "#/components/schemas/game"
-        "400":
-          description: Bad request.
   /room:
     get:
-      summary: Get all rooms
-      description: Get list of rooms with optional condition.
+      summary: Get list of rooms
+      description: Get list of rooms.
       tags:
         - room
       parameters:
@@ -127,11 +124,6 @@ paths:
             type: integer
             minimum: 1
             maximum: 100
-        - name: game_id
-          in: query
-          description: Get all rooms of a specific game via game_id
-          schema:
-            type: integer
       responses:
         "200":
           description: Ok.
@@ -374,6 +366,16 @@ paths:
           $ref: "#/components/responses/UnauthorizedError"
 components:
   schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        money:
+          type: integer
+          minimum: 0
     room:
       type: object
       properties:
@@ -535,7 +537,7 @@ components:
             properties:
               user_id:
                 type: integer
-              amount:
+              winning_amount:
                 type: integer
               best_combination:
                 type: object
