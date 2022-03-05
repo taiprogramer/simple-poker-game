@@ -33,10 +33,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                    username:
-                      type: string
+                $ref: "#/components/schemas/user"
         "400":
           description: Invalid information.
           content:
