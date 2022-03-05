@@ -15,6 +15,12 @@ type ErrorResponse struct {
 	ErrorMessages []string `json:"error_messages"`
 }
 
+func NewErrorResponse(messages []string) ErrorResponse {
+	errorResponse := ErrorResponse{}
+	errorResponse.ErrorMessages = messages
+	return errorResponse
+}
+
 type UserSchemaResponse struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
@@ -54,20 +60,21 @@ func main() {
 	// create new account
 	app.Post("/user", func(c *fiber.Ctx) error {
 		user := new(UserAccountSignUpBody)
-		e := ErrorResponse{}
 		if err := c.BodyParser(user); err != nil {
-			e.ErrorMessages = append(e.ErrorMessages, "Unknown error")
+			e := NewErrorResponse([]string{"Unknown error"})
 			return c.Status(fiber.StatusBadRequest).JSON(e)
 		}
 
 		if accountExists(user) {
-			e.ErrorMessages = append(e.ErrorMessages, "Username already exists")
+			e := NewErrorResponse([]string{
+				"Username already exists",
+			})
 			return c.Status(fiber.StatusBadRequest).JSON(e)
 		}
 
 		u, ok := createAccount(user)
 		if !ok {
-			e.ErrorMessages = append(e.ErrorMessages, "Unknown error")
+			e := NewErrorResponse([]string{"Unknown error"})
 			return c.Status(fiber.StatusBadRequest).JSON(e)
 		}
 
