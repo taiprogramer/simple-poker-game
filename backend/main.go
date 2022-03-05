@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -156,4 +157,12 @@ func main() {
 	db.AutoMigrate(&UsersTablesCard{})
 	db.AutoMigrate(&UsersTablesCombination{})
 	db.AutoMigrate(&CombinationDetailsCard{})
+
+	app := fiber.New()
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, Fiber")
+	})
+
+	app.Listen(":3000")
 }
