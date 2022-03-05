@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
+	"github.com/taiprogramer/simple-poker-game/backend/utils"
 )
 
 type UserAccountSignUpBody struct {
@@ -21,16 +22,27 @@ type UserSchemaResponse struct {
 }
 
 func accountExists(user *UserAccountSignUpBody) bool {
-	return false
+	var u db.User
+	db.DB.Where(&db.User{Username: user.Username}).First(&u)
+	return u.Username != ""
 }
 
-func createAccount(user *UserAccountSignUpBody) (*UserSchemaResponse, bool) {
-	u := &UserSchemaResponse{
-		ID:       0,
-		Username: "dummy",
-		Money:    0,
+func createAccount(body *UserAccountSignUpBody) (*UserSchemaResponse, bool) {
+	hashedPassword, ok := utils.HashPassword(body.Password)
+	if !ok {
+		return &UserSchemaResponse{}, false
 	}
-	return u, true
+	user := db.User{
+		Username:       body.Username,
+		HashedPassword: hashedPassword,
+		Money:          0,
+	}
+	ok = db.DB.Create(&user).RowsAffected == 1
+	return &UserSchemaResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Money:    user.Money,
+	}, ok
 }
 
 func main() {
