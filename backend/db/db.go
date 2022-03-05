@@ -143,6 +143,19 @@ func InitDB() bool {
 	dsn := "host=localhost user=postgres password= dbname=postgres port=5432"
 	dbConnection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
+	dbConnection.AutoMigrate(&User{})
+	dbConnection.AutoMigrate(&Action{})
+	dbConnection.AutoMigrate(&Combination{})
+	dbConnection.AutoMigrate(&Card{})
+	dbConnection.AutoMigrate(&CombinationDetail{})
+	dbConnection.AutoMigrate(&Room{})
+	dbConnection.AutoMigrate(&WaitingList{})
+	dbConnection.AutoMigrate(&Table{})
+	dbConnection.AutoMigrate(&BetHistory{})
+	dbConnection.AutoMigrate(&UsersTablesCard{})
+	dbConnection.AutoMigrate(&UsersTablesCombination{})
+	dbConnection.AutoMigrate(&CombinationDetailsCard{})
+
 	if err != nil {
 		fmt.Print("Can not connect to database")
 		return false
