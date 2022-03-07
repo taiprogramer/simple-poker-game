@@ -14,6 +14,7 @@ func main() {
 
 	// create new account
 	app.Post("/user", routes.SignUpHandler)
+	app.Post("/auth", routes.SignInHandler)
 
 	app.Listen(":3000")
 }

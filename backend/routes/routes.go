@@ -27,6 +27,10 @@ type UserSchemaResponse struct {
 	Money    int    `json:"money"`
 }
 
+type SignInSuccessResponse struct {
+	AccessToken string `json:"access_token"`
+}
+
 func accountExists(user *UserAccountSignUpBody) bool {
 	var u db.User
 	db.DB.Where(&db.User{Username: user.Username}).First(&u)
@@ -51,6 +55,18 @@ func createAccount(body *UserAccountSignUpBody) (*UserSchemaResponse, bool) {
 	}, ok
 }
 
+func userAndPasswordCorrect(body *UserAccountSignUpBody) bool {
+	var user db.User
+	result := db.DB.Where("username = ?", body.Username).First(&user)
+	if result.RowsAffected == 0 {
+		return false
+	}
+	if !secure.ComparePassword(body.Password, user.HashedPassword) {
+		return false
+	}
+	return true
+}
+
 func SignUpHandler(c *fiber.Ctx) error {
 	user := new(UserAccountSignUpBody)
 	if err := c.BodyParser(user); err != nil {
@@ -72,4 +88,23 @@ func SignUpHandler(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(u)
+}
+
+func SignInHandler(c *fiber.Ctx) error {
+	user := new(UserAccountSignUpBody)
+	if err := c.BodyParser(user); err != nil {
+		e := NewErrorResponse([]string{"Unknown error"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	if !userAndPasswordCorrect(user) {
+		e := NewErrorResponse([]string{
+			"Incorrect username or password",
+		})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	response := SignInSuccessResponse{
+		AccessToken: secure.GenerateToken(user.Username),
+	}
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
