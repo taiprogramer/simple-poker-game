@@ -46,6 +46,8 @@ paths:
       tags:
         - authentication
       description: Users get information about them.
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Ok.
