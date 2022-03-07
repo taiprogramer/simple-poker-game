@@ -1,6 +1,13 @@
 package secure
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"os"
+	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
+)
 
 func HashPassword(password string) (string, bool) {
 	b, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -12,6 +19,16 @@ func ComparePassword(plain, hash string) bool {
 	return err == nil
 }
 
-func GenerateToken(s string) string {
-	return ""
+func GenerateToken(s string) (string, bool) {
+	err := godotenv.Load()
+	if err != nil {
+		return "", false
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"usr": s,
+		"exp": time.Now().Add(time.Minute * 30).Unix(),
+	})
+	hmacSecret := os.Getenv("HMAC_SECRET_KEY")
+	tokenString, err := token.SignedString([]byte(hmacSecret))
+	return tokenString, err == nil
 }

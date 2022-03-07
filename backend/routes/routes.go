@@ -103,8 +103,16 @@ func SignInHandler(c *fiber.Ctx) error {
 		})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
+
+	tokenString, ok := secure.GenerateToken(user.Username)
+	if !ok {
+		e := NewErrorResponse([]string{
+			"Can not generate jwt token",
+		})
+		return c.Status(fiber.StatusInternalServerError).JSON(e)
+	}
 	response := SignInSuccessResponse{
-		AccessToken: secure.GenerateToken(user.Username),
+		AccessToken: tokenString,
 	}
 	return c.Status(fiber.StatusCreated).JSON(response)
 }
