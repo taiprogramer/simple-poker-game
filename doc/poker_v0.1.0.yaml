@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Simple Poker Game
   version: 0.1.0
-  license: 
+  license:
     name: MIT
     url: https://mit-license.org/
 servers:
@@ -88,19 +88,20 @@ paths:
               schema:
                 type: object
                 properties:
-                    access_token:
-                      type: string
+                  access_token:
+                    type: string
         "400":
           description: Sign in fail.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                    error_messages:
-                      type: array
-                      items:
-                        type: string
+                $ref: "#/components/schemas/errors"
+        "500":
+          description: Internal Server Error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
   /room:
     get:
       summary: Get list of rooms
@@ -139,12 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                    error_messages:
-                      type: array
-                      items:
-                        type: string
+                $ref: "#/components/schemas/errors"
     post:
       summary: Create new room
       tags:
@@ -314,7 +310,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/table"
-        "400": 
+        "400":
           description: Invalid parameters.
           content:
             application/json:
@@ -353,7 +349,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/table"
-        "400": 
+        "400":
           description: Bad request.
           content:
             application/json:
@@ -382,7 +378,7 @@ components:
           type: string
         users:
           description: All users in room include owner.
-          type: array 
+          type: array
           items:
             type: object
             properties:
