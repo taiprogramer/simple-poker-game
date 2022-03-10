@@ -8,22 +8,13 @@ import (
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
+	"github.com/taiprogramer/simple-poker-game/backend/routes"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
 )
 
 type UserAccountSignUpBody struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type ErrorResponse struct {
-	ErrorMessages []string `json:"error_messages"`
-}
-
-func NewErrorResponse(messages []string) ErrorResponse {
-	errorResponse := ErrorResponse{}
-	errorResponse.ErrorMessages = messages
-	return errorResponse
 }
 
 type UserSchemaResponse struct {
@@ -92,12 +83,12 @@ func getUserById(id int) (*db.User, bool) {
 func SignUpHandler(c *fiber.Ctx) error {
 	user := new(UserAccountSignUpBody)
 	if err := c.BodyParser(user); err != nil {
-		e := NewErrorResponse([]string{"Unknown error"})
+		e := routes.NewErrorResponse([]string{"Unknown error"})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
 	if accountExists(user) {
-		e := NewErrorResponse([]string{
+		e := routes.NewErrorResponse([]string{
 			"Username already exists",
 		})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
@@ -105,7 +96,7 @@ func SignUpHandler(c *fiber.Ctx) error {
 
 	u, ok := createAccount(user)
 	if !ok {
-		e := NewErrorResponse([]string{"Unknown error"})
+		e := routes.NewErrorResponse([]string{"Unknown error"})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
@@ -115,12 +106,12 @@ func SignUpHandler(c *fiber.Ctx) error {
 func SignInHandler(c *fiber.Ctx) error {
 	user := new(UserAccountSignUpBody)
 	if err := c.BodyParser(user); err != nil {
-		e := NewErrorResponse([]string{"Unknown error"})
+		e := routes.NewErrorResponse([]string{"Unknown error"})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
 	if !userAndPasswordCorrect(user) {
-		e := NewErrorResponse([]string{
+		e := routes.NewErrorResponse([]string{
 			"Incorrect username or password",
 		})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
@@ -128,7 +119,7 @@ func SignInHandler(c *fiber.Ctx) error {
 
 	tokenString, ok := secure.GenerateToken(user.Username)
 	if !ok {
-		e := NewErrorResponse([]string{
+		e := routes.NewErrorResponse([]string{
 			"Can not generate jwt token",
 		})
 		return c.Status(fiber.StatusInternalServerError).JSON(e)
@@ -142,14 +133,14 @@ func SignInHandler(c *fiber.Ctx) error {
 func GetUserHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		e := NewErrorResponse([]string{"Please supply your user id!"})
+		e := routes.NewErrorResponse([]string{"Please supply your user id!"})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
 	// get user in db
 	user, ok := getUserById(id)
 	if !ok {
-		e := NewErrorResponse([]string{"User does not exist."})
+		e := routes.NewErrorResponse([]string{"User does not exist."})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
@@ -159,7 +150,7 @@ func GetUserHandler(c *fiber.Ctx) error {
 	username := claims["usr"]
 
 	if username != user.Username {
-		e := NewErrorResponse([]string{
+		e := routes.NewErrorResponse([]string{
 			"Please supply your user id! Not id of other. Are you hacker?",
 		})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
