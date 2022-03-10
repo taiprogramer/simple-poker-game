@@ -25,6 +25,7 @@ func main() {
 	app.Use(routes.JWTMiddleWare())
 
 	// restricted
+	app.Get("user/:id", routes.GetUserHandler)
 
 	app.Listen(":3000")
 }

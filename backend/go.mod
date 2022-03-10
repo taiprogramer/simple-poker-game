@@ -14,7 +14,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 )
 
-require github.com/golang-jwt/jwt/v4 v4.3.0 // indirect
+require github.com/golang-jwt/jwt/v4 v4.3.0
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect

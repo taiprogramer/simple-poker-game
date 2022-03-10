@@ -2,9 +2,11 @@ package routes
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
 )
@@ -38,6 +40,7 @@ type SignInSuccessResponse struct {
 func JWTMiddleWare() func(*fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
 		SigningKey: []byte(os.Getenv("HMAC_SECRET_KEY")),
+		ContextKey: "token",
 	})
 }
 
@@ -75,6 +78,15 @@ func userAndPasswordCorrect(body *UserAccountSignUpBody) bool {
 		return false
 	}
 	return true
+}
+
+func getUserById(id int) (*db.User, bool) {
+	var user db.User
+	result := db.DB.First(&user, id)
+	if result.RowsAffected == 0 {
+		return nil, false
+	}
+	return &user, true
 }
 
 func SignUpHandler(c *fiber.Ctx) error {
@@ -125,4 +137,39 @@ func SignInHandler(c *fiber.Ctx) error {
 		AccessToken: tokenString,
 	}
 	return c.Status(fiber.StatusCreated).JSON(response)
+}
+
+func GetUserHandler(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		e := NewErrorResponse([]string{"Please supply your user id!"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	// get user in db
+	user, ok := getUserById(id)
+	if !ok {
+		e := NewErrorResponse([]string{"User does not exist."})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	// check correct owner
+	token := c.Locals("token").(*jwt.Token)
+	claims := token.Claims.(jwt.MapClaims)
+	username := claims["usr"]
+
+	if username != user.Username {
+		e := NewErrorResponse([]string{
+			"Please supply your user id! Not id of other. Are you hacker?",
+		})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	response := UserSchemaResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Money:    user.Money,
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
