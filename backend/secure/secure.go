@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,10 +19,6 @@ func ComparePassword(plain, hash string) bool {
 }
 
 func GenerateToken(s string) (string, bool) {
-	err := godotenv.Load()
-	if err != nil {
-		return "", false
-	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"usr": s,
 		"exp": time.Now().Add(time.Minute * 30).Unix(),
