@@ -17,9 +17,14 @@ func main() {
 	}
 	app := fiber.New()
 
-	// create new account
+	// non-restricted
 	app.Post("/user", routes.SignUpHandler)
 	app.Post("/auth", routes.SignInHandler)
+
+	// Bearer Token is Required
+	app.Use(routes.JWTMiddleWare())
+
+	// restricted
 
 	app.Listen(":3000")
 }

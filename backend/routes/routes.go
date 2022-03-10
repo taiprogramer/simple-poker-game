@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"os"
+
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
 )
@@ -29,6 +32,13 @@ type UserSchemaResponse struct {
 
 type SignInSuccessResponse struct {
 	AccessToken string `json:"access_token"`
+}
+
+// Bearer Token Authorization Middleware (JWT)
+func JWTMiddleWare() func(*fiber.Ctx) error {
+	return jwtware.New(jwtware.Config{
+		SigningKey: []byte(os.Getenv("HMAC_SECRET_KEY")),
+	})
 }
 
 func accountExists(user *UserAccountSignUpBody) bool {
