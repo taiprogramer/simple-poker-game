@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
-	"github.com/taiprogramer/simple-poker-game/backend/routes"
+	authRouter "github.com/taiprogramer/simple-poker-game/backend/routes/auth"
 )
 
 func main() {
@@ -18,14 +18,14 @@ func main() {
 	app := fiber.New()
 
 	// non-restricted
-	app.Post("/user", routes.SignUpHandler)
-	app.Post("/auth", routes.SignInHandler)
+	app.Post("/user", authRouter.SignUpHandler)
+	app.Post("/auth", authRouter.SignInHandler)
 
 	// Bearer Token is Required
-	app.Use(routes.JWTMiddleWare())
+	app.Use(authRouter.JWTMiddleWare())
 
 	// restricted
-	app.Get("user/:id", routes.GetUserHandler)
+	app.Get("user/:id", authRouter.GetUserHandler)
 
 	app.Listen(":3000")
 }
