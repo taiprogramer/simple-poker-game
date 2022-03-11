@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,4 +26,10 @@ func GenerateToken(s string) (string, bool) {
 	hmacSecret := os.Getenv("HMAC_SECRET_KEY")
 	tokenString, err := token.SignedString([]byte(hmacSecret))
 	return tokenString, err == nil
+}
+
+func GetJWTClaim(claim string, token interface{}) interface{} {
+	_token := token.(*jwt.Token)
+	claims := _token.Claims.(jwt.MapClaims)
+	return claims[claim]
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	authRouter "github.com/taiprogramer/simple-poker-game/backend/routes/auth"
+	roomRouter "github.com/taiprogramer/simple-poker-game/backend/routes/room"
 )
 
 func main() {
@@ -26,6 +27,7 @@ func main() {
 
 	// restricted
 	app.Get("user/:id", authRouter.GetUserHandler)
+	app.Post("/room", roomRouter.CreateNewRoomHandler)
 
 	app.Listen(":3000")
 }
