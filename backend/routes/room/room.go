@@ -53,13 +53,29 @@ func createNewRoom(userID uint, private bool, password string) (*RoomSchemaRespo
 	if result.RowsAffected == 0 {
 		return &RoomSchemaResponse{}, false
 	}
+
+	// add room owner to waiting list
+	waitingList := db.WaitingList{
+		UserID:         userID,
+		AvailableMoney: 0,
+		Ready:          true,
+		RoomID:         room.ID,
+	}
+
+	db.DB.Create(&waitingList)
+
 	roomResponse := RoomSchemaResponse{
 		ID:      room.ID,
 		Code:    room.Code,
 		Playing: room.Playing,
 		Private: room.Private,
 		Owner:   room.UserID,
-		Users:   []UserInRoomSchema{},
+		Users: []UserInRoomSchema{
+			{
+				ID:    waitingList.UserID,
+				Ready: waitingList.Ready,
+			},
+		},
 	}
 	return &roomResponse, true
 }
