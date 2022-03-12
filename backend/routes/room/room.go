@@ -1,6 +1,8 @@
 package room
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	"github.com/taiprogramer/simple-poker-game/backend/routes"
@@ -93,4 +95,54 @@ func CreateNewRoomHandler(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(response)
+}
+
+func getRoomById(id int) (*RoomSchemaResponse, bool) {
+	var room db.Room
+	result := db.DB.First(&room, id)
+	if result.RowsAffected == 0 {
+		return &RoomSchemaResponse{}, false
+	}
+	// find table belongs to room
+	var table db.Table
+	db.DB.Where("room_id = ?", id).First(&table)
+
+	// users in room
+	usersInRoom := make([]UserInRoomSchema, 0)
+	var waitingLists []db.WaitingList
+	db.DB.Where("room_id", id).Find(&waitingLists)
+	for _, v := range waitingLists {
+		usersInRoom = append(usersInRoom, UserInRoomSchema{
+			ID:    v.UserID,
+			Ready: v.Ready,
+		})
+	}
+
+	roomResponse := RoomSchemaResponse{
+		ID:      room.ID,
+		Code:    room.Code,
+		Playing: room.Playing,
+		Private: room.Private,
+		Users:   usersInRoom,
+		Owner:   room.UserID,
+		Table:   table.ID,
+	}
+
+	return &roomResponse, true
+}
+
+func GetSpecificRoomHandler(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		e := routes.NewErrorResponse([]string{"Please supply a room id!"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	response, ok := getRoomById(id)
+
+	if !ok {
+		e := routes.NewErrorResponse([]string{"Room not found."})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	return c.Status(fiber.StatusOK).JSON(response)
 }
