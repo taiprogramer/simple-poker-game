@@ -174,10 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  room:
-                    $ref: "#/components/schemas/room"
+                $ref: "#/components/schemas/room"
         "400":
           description: Invalid parameters.
           content:
@@ -205,10 +202,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  room:
-                    $ref: "#/components/schemas/room"
+                $ref: "#/components/schemas/room"
         "400":
           description: Invalid required parameters.
           content:
