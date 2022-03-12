@@ -154,10 +154,20 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user_id:
-                  type: integer
+              oneOf:
+                - type: object
+                  properties:
+                    user_id:
+                      description: Room owner.
+                      type: integer
+                - type: object
+                  properties:
+                    user_id:
+                      description: Room owner.
+                      type: integer
+                    password:
+                      description: Room password if room is private in plain text.
+                      type: string
       responses:
         "201":
           description: Room is created.
