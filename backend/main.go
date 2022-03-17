@@ -21,6 +21,7 @@ func main() {
 	// non-restricted
 	app.Post("/user", authRouter.SignUpHandler)
 	app.Post("/auth", authRouter.SignInHandler)
+	app.Get("/room", roomRouter.GetListRoomsHandler)
 	app.Get("/room/:id", roomRouter.GetSpecificRoomHandler)
 
 	// Bearer Token is Required

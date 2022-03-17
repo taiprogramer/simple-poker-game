@@ -162,3 +162,55 @@ func GetSpecificRoomHandler(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).JSON(response)
 }
+
+func getListRooms(offset int, limit int) ([]RoomSchemaResponse, bool) {
+	var rooms []db.Room
+	db.DB.Offset(offset).Limit(limit).Find(&rooms)
+
+	listRooms := make([]RoomSchemaResponse, 0)
+	for _, room := range rooms {
+		var table db.Table
+		db.DB.Where("room_id = ?", room.ID).First(&table)
+		usersInRoom := make([]UserInRoomSchema, 0)
+		var waitingLists []db.WaitingList
+		db.DB.Where("room_id", room.ID).Find(&waitingLists)
+		for _, v := range waitingLists {
+			usersInRoom = append(usersInRoom, UserInRoomSchema{
+				ID:    v.UserID,
+				Ready: v.Ready,
+			})
+		}
+		roomResponse := RoomSchemaResponse{
+			ID:      room.ID,
+			Code:    room.Code,
+			Playing: room.Playing,
+			Private: room.Private,
+			Users:   usersInRoom,
+			Owner:   room.UserID,
+			Table:   table.ID,
+		}
+		listRooms = append(listRooms, roomResponse)
+	}
+
+	return listRooms, true
+}
+
+func GetListRoomsHandler(c *fiber.Ctx) error {
+	offset, offsetErr := strconv.Atoi(c.Query("offset"))
+	limit, limitErr := strconv.Atoi(c.Query("limit"))
+	if offsetErr != nil || limitErr != nil {
+		e := routes.NewErrorResponse([]string{"Missing query: limit " +
+			"and offset are required"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	if offset < 0 || limit < 1 || limit > 100 {
+		e := routes.NewErrorResponse([]string{
+			"Invalid query: limit in [1..100] and offset >= 0",
+		})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	listRooms, _ := getListRooms(offset, limit)
+	return c.Status(fiber.StatusOK).JSON(listRooms)
+}
