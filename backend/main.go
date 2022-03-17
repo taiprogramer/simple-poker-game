@@ -30,6 +30,7 @@ func main() {
 	// restricted
 	app.Get("user/:id", authRouter.GetUserHandler)
 	app.Post("/room", roomRouter.CreateNewRoomHandler)
+	app.Delete("/room/:id", roomRouter.DeleteRoomHandler)
 
 	app.Listen(":3000")
 }

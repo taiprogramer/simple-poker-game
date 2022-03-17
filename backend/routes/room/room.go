@@ -1,6 +1,7 @@
 package room
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -213,4 +214,46 @@ func GetListRoomsHandler(c *fiber.Ctx) error {
 
 	listRooms, _ := getListRooms(offset, limit)
 	return c.Status(fiber.StatusOK).JSON(listRooms)
+}
+
+func deleteRoomByID(id int, userID uint) error {
+	var room db.Room
+	db.DB.Where("id = ?", id).First(&room)
+	if room.ID == 0 {
+		return errors.New("Room not found")
+	}
+	if room.UserID != userID {
+		return errors.New("You are not the room owner")
+	}
+	if room.Playing {
+		return errors.New("Room is in playing state")
+	}
+
+	result := db.DB.Delete(&room)
+	if result.RowsAffected == 0 {
+		return errors.New("Database got an error")
+	}
+	return nil
+}
+
+func DeleteRoomHandler(c *fiber.Ctx) error {
+	type Body struct {
+		UserID uint `json:"user_id"`
+	}
+	roomID, roomIDerr := strconv.Atoi(c.Params("id"))
+	b := new(Body)
+	if err := c.BodyParser(b); err != nil || b.UserID == 0 {
+		e := routes.NewErrorResponse([]string{"user_id is required"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	if roomIDerr != nil {
+		e := routes.NewErrorResponse([]string{"Room not found"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	err := deleteRoomByID(roomID, b.UserID)
+	if err != nil {
+		e := routes.NewErrorResponse([]string{err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	return c.SendStatus(fiber.StatusOK)
 }
