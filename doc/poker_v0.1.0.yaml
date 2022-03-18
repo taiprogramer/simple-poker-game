@@ -209,7 +209,7 @@ paths:
     post:
       security:
         - bearerAuth: []
-      summary: Join room and mark ready
+      summary: Join room
       tags:
         - room
       parameters:
@@ -219,11 +219,6 @@ paths:
           required: true
           schema:
             type: integer
-        - in: query
-          name: ready
-          description: Mark ready or not.
-          schema:
-            type: boolean
       requestBody:
         required: true
         content:
@@ -233,9 +228,55 @@ paths:
               properties:
                 user_id:
                   type: integer
+                money:
+                  description: How much money do users want to bring to room.
+                  type: integer
       responses:
         "200":
           description: Join success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room:
+                    $ref: "#/components/schemas/room"
+        "400":
+          description: Invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errors"
+
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update ready status
+      tags:
+        - room
+      parameters:
+        - in: path
+          name: id
+          description: room_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                ready:
+                  type: boolean
+      responses:
+        "200":
+          description: Success.
           content:
             application/json:
               schema:
