@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
@@ -13,7 +15,9 @@ func main() {
 		return
 	}
 
-	if !db.InitDB() {
+	err := db.InitDB()
+	if err != nil {
+		fmt.Println(err.Error())
 		return
 	}
 	app := fiber.New()

@@ -14,7 +14,10 @@ require (
 	github.com/joho/godotenv v1.4.0
 )
 
-require github.com/golang-jwt/jwt/v4 v4.3.0
+require (
+	github.com/golang-jwt/jwt/v4 v4.3.0
+	gorm.io/driver/sqlite v1.3.1
+)
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
@@ -29,6 +32,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/klauspost/compress v1.15.0 // indirect
+	github.com/mattn/go-sqlite3 v1.14.9 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.34.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

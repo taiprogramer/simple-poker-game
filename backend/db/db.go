@@ -1,9 +1,11 @@
 package db
 
 import (
-	"fmt"
+	"errors"
+	"os"
 
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -139,9 +141,26 @@ type CombinationDetailsCard struct {
 
 var DB *gorm.DB
 
-func InitDB() bool {
-	dsn := "host=localhost user=postgres password= dbname=postgres port=5432"
-	dbConnection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func InitDB() error {
+	var dbConnection *gorm.DB
+	var err error
+
+	mode := os.Getenv("SERVER_MODE")
+
+	if mode != "development" && mode != "production" {
+		return errors.New(
+			"Please setup SERVER_MODE env with values in " +
+				"[\"development\", \"production\" ]")
+	}
+
+	if mode == "development" {
+		dbConnection, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	}
+
+	if mode == "production" {
+		dsn := "host=localhost user=postgres password= dbname=postgres port=5432"
+		dbConnection, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	}
 
 	dbConnection.AutoMigrate(&User{})
 	dbConnection.AutoMigrate(&Action{})
@@ -157,9 +176,8 @@ func InitDB() bool {
 	dbConnection.AutoMigrate(&CombinationDetailsCard{})
 
 	if err != nil {
-		fmt.Print("Can not connect to database")
-		return false
+		return errors.New("Can not connect to the database")
 	}
 	DB = dbConnection
-	return true
+	return nil
 }
