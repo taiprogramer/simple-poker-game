@@ -36,6 +36,7 @@ func main() {
 	app.Post("/room", roomRouter.CreateNewRoomHandler)
 	app.Delete("/room/:id", roomRouter.DeleteRoomHandler)
 	app.Post("/room/:id", roomRouter.JoinRoomHandler)
+	app.Put("/room/:id", roomRouter.UpdateReadyStatusHandler)
 
 	app.Listen(":3000")
 }

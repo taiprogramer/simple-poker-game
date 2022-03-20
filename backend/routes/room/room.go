@@ -334,3 +334,52 @@ func JoinRoomHandler(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).JSON(roomResponse)
 }
+
+func updateReadyStatus(userID uint, roomID int, ready bool) (*RoomSchemaResponse, error) {
+	var waitingList db.WaitingList
+	result := db.DB.Where(
+		"room_id = ? AND user_id = ?",
+		roomID,
+		userID).First(&waitingList)
+
+	if result.RowsAffected == 0 {
+		return nil, errors.New("Please join room first")
+	}
+
+	waitingList.Ready = ready
+	result = db.DB.Save(&waitingList)
+	if result.RowsAffected == 0 {
+		return nil, errors.New("Can not update ready status")
+	}
+
+	room, ok := getRoomById(int(roomID))
+	if !ok {
+		return nil, errors.New("Can not get room info")
+	}
+	return room, nil
+}
+
+func UpdateReadyStatusHandler(c *fiber.Ctx) error {
+	type Body struct {
+		UserID uint `json:"user_id"`
+		Ready  bool `json:"ready"`
+	}
+
+	roomID, roomIDerr := strconv.Atoi(c.Params("id"))
+	body := new(Body)
+	if err := c.BodyParser(body); err != nil || body.UserID == 0 {
+		e := routes.NewErrorResponse(
+			[]string{"user_id and ready status are required"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	if roomIDerr != nil {
+		e := routes.NewErrorResponse([]string{"Room not found"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	roomResponse, err := updateReadyStatus(body.UserID, roomID, body.Ready)
+	if err != nil {
+		e := routes.NewErrorResponse([]string{err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	return c.Status(fiber.StatusOK).JSON(roomResponse)
+}
