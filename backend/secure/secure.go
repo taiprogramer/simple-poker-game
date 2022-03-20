@@ -2,6 +2,7 @@ package secure
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -19,9 +20,14 @@ func ComparePassword(plain, hash string) bool {
 }
 
 func GenerateToken(s string) (string, bool) {
+	expireTime, err := strconv.Atoi(os.Getenv("JWT_EXPIRE_IN_MINUTE"))
+	if err != nil {
+		expireTime = 30 // default: 30 minutes
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"usr": s,
-		"exp": time.Now().Add(time.Minute * 30).Unix(),
+		"exp": time.Now().Add(time.Minute *
+			time.Duration(expireTime)).Unix(),
 	})
 	hmacSecret := os.Getenv("HMAC_SECRET_KEY")
 	tokenString, err := token.SignedString([]byte(hmacSecret))
