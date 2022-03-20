@@ -35,6 +35,7 @@ func main() {
 	app.Get("user/:id", authRouter.GetUserHandler)
 	app.Post("/room", roomRouter.CreateNewRoomHandler)
 	app.Delete("/room/:id", roomRouter.DeleteRoomHandler)
+	app.Post("/room/:id", roomRouter.JoinRoomHandler)
 
 	app.Listen(":3000")
 }

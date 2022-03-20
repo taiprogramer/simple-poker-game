@@ -8,6 +8,7 @@ import (
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	"github.com/taiprogramer/simple-poker-game/backend/routes"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
+	"gorm.io/gorm"
 )
 
 type UserInRoomSchema struct {
@@ -256,4 +257,80 @@ func DeleteRoomHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 	return c.SendStatus(fiber.StatusOK)
+}
+
+func joinRoom(userID uint, roomID uint, money int) (*RoomSchemaResponse, error) {
+	var waitingLists []db.WaitingList
+	db.DB.Where("room_id = ?", roomID).Find(&waitingLists)
+	numUsers := len(waitingLists)
+	if numUsers >= 9 {
+		return &RoomSchemaResponse{}, errors.New("Room is full")
+	}
+	// user is already in waiting list
+	for _, v := range waitingLists {
+		if v.UserID == userID {
+			return &RoomSchemaResponse{},
+				errors.New("You are already in the waiting list")
+		}
+	}
+
+	// check valid money (money user brings to the room must be less than or
+	// equal total money of user)
+	var user db.User
+	db.DB.First(&user, userID)
+	if money > user.Money {
+		return &RoomSchemaResponse{},
+			errors.New("Money is not enough")
+	}
+
+	err := db.DB.Transaction(func(tx *gorm.DB) error {
+		waitingInfo := db.WaitingList{
+			UserID:         userID,
+			RoomID:         roomID,
+			AvailableMoney: money,
+			Ready:          false,
+		}
+		if err := tx.Create(&waitingInfo).Error; err != nil {
+			return err
+		}
+		// subtract user's money in their profile
+		user.Money = user.Money - money
+		if err := tx.Save(&user).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return &RoomSchemaResponse{}, err
+	}
+
+	room, ok := getRoomById(int(roomID))
+	if !ok {
+		return &RoomSchemaResponse{},
+			errors.New("Can not get room info")
+	}
+	return room, nil
+}
+
+func JoinRoomHandler(c *fiber.Ctx) error {
+	type Body struct {
+		UserID uint `json:"user_id"`
+		Money  int  `json:"money"`
+	}
+	roomID, roomIDerr := strconv.Atoi(c.Params("id"))
+	body := new(Body)
+	if err := c.BodyParser(body); err != nil || body.UserID == 0 {
+		e := routes.NewErrorResponse([]string{"user_id and money are required"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	if roomIDerr != nil {
+		e := routes.NewErrorResponse([]string{"Room not found"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	roomResponse, err := joinRoom(body.UserID, uint(roomID), body.Money)
+	if err != nil {
+		e := routes.NewErrorResponse([]string{err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	return c.Status(fiber.StatusOK).JSON(roomResponse)
 }
