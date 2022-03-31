@@ -26,6 +26,73 @@ type RoomSchemaResponse struct {
 	Users   []UserInRoomSchema `json:"users"`
 }
 
+type CardSchemaResponse struct {
+	ID     uint   `json:"id"`
+	Number int    `json:"number"`
+	Suit   int    `json:"suit"`
+	Image  string `json:"image"`
+}
+
+type CombinationSchemaResponse struct {
+	ID                  uint                 `json:"id"`
+	Name                string               `json:"name"`
+	SelectedCommonCards []CardSchemaResponse `json:"selected_common_cards"`
+}
+
+type TurnSchemaResponse struct {
+	UserID uint `json:"user_id"`
+}
+
+type ActionSchemaResponse struct {
+	ID     uint   `json:"id"`
+	Name   string `json:"name"`
+	Amount int    `json:"amount"`
+}
+
+type BetSchemaResponse struct {
+	UserID uint                 `json:"user_id"`
+	Action ActionSchemaResponse `json:"action"`
+}
+
+type AvailableActionSchemaResponse struct {
+	CanFold  bool `json:"can_fold"`
+	CanCheck bool `json:"can_check"`
+	CanRaise bool `json:"can_raise"`
+	CanCall  bool `json:"can_call"`
+}
+
+type PlayerSchemaResponse struct {
+	ID             uint `json:"id"`
+	AvailableMoney int  `json:"available_money"`
+}
+
+type ResultSchemaResponse struct {
+	UserID uint                 `json:"user_id"`
+	Cards  []CardSchemaResponse `json:"cards"`
+}
+
+type WinningSchemaResponse struct {
+	UserID          uint                      `json:"user_id"`
+	WinningAmount   int                       `json:"winning_amount"`
+	BestCombination CombinationSchemaResponse `json:"best_combination"`
+}
+
+type TableSchemaResponse struct {
+	ID              uint                          `json:"id"`
+	Round           int                           `json:"round"`
+	Done            bool                          `json:"done"`
+	Pot             int                           `json:"pot"`
+	CommonCards     []CardSchemaResponse          `json:"common_cards"`
+	OwnCards        []CardSchemaResponse          `json:"own_cards"`
+	BestCombination CombinationSchemaResponse     `json:"best_combination"`
+	CurrentTurn     TurnSchemaResponse            `json:"user_id"`
+	LatestBet       BetSchemaResponse             `json:"latest_bet"`
+	AvailableAction AvailableActionSchemaResponse `json:"available_action"`
+	Players         []PlayerSchemaResponse        `json:"players"`
+	Results         []ResultSchemaResponse        `json:"results"`
+	Winers          []WinningSchemaResponse       `json:"winers"`
+}
+
 type RoomBody struct {
 	UserID   uint   `json:"user_id"`
 	Password string `json:"password"`
@@ -382,4 +449,136 @@ func UpdateReadyStatusHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 	return c.Status(fiber.StatusOK).JSON(roomResponse)
+}
+
+func cardsToCardsResponse(cards []*db.Card) []CardSchemaResponse {
+	cardsSchema := make([]CardSchemaResponse, 0)
+	for _, v := range cards {
+		c := CardSchemaResponse{
+			ID:     v.ID,
+			Number: int(v.Number),
+			Suit:   int(v.Suit),
+			Image:  v.Image,
+		}
+		cardsSchema = append(cardsSchema, c)
+	}
+	return cardsSchema
+}
+
+func userTableCardsToCards(value []db.UsersTablesCard) []*db.Card {
+	cards := make([]*db.Card, 0)
+	for _, v := range value {
+		cards = append(cards, &v.Card)
+	}
+	return cards
+}
+
+func combinationDetailCardsToCards(value []db.CombinationDetailsCard) []*db.Card {
+	cards := make([]*db.Card, 0)
+	for _, v := range value {
+		cards = append(cards, &v.Card)
+	}
+	return cards
+}
+
+func waitingListToPlayers(value []db.WaitingList) []PlayerSchemaResponse {
+	players := make([]PlayerSchemaResponse, 0)
+	for _, v := range value {
+		players = append(players, PlayerSchemaResponse{
+			ID:             v.UserID,
+			AvailableMoney: v.AvailableMoney,
+		})
+	}
+	return players
+}
+
+func waitingListToResults(value []db.WaitingList, tableID uint) []ResultSchemaResponse {
+	results := make([]ResultSchemaResponse, 0)
+	for _, v := range value {
+		var cardsOfUser []db.UsersTablesCard
+		db.DB.Preload("Card").Where(&db.UsersTablesCard{TableID: tableID, UserID: v.UserID}).Find(&cardsOfUser)
+		results = append(results, ResultSchemaResponse{
+			UserID: v.UserID,
+			Cards:  cardsToCardsResponse(userTableCardsToCards(cardsOfUser)),
+		})
+	}
+	return results
+}
+
+func getTableInfo(tableID int, userID uint) (*TableSchemaResponse, error) {
+	var table db.Table
+	result := db.DB.Preload("Cards").First(&table, tableID)
+	if result.RowsAffected == 0 {
+		return nil, errors.New("Table not found")
+	}
+
+	var ownCards []db.UsersTablesCard
+	db.DB.Preload("Card").Where(&db.UsersTablesCard{TableID: table.ID, UserID: userID}).Find(&ownCards)
+
+	var bestCombination db.UsersTablesCombination
+	db.DB.Preload("Combination").Where(&db.UsersTablesCombination{TableID: table.ID, UserID: userID}).First(&bestCombination)
+	var combinationDetailCards []db.CombinationDetailsCard
+	db.DB.Preload("Card").Where(&db.CombinationDetailsCard{CombinationDetailID: bestCombination.CombinationDetailID}).Find(&combinationDetailCards)
+	var betHistory db.BetHistory
+	db.DB.Preload("Action").Where(&db.BetHistory{TableID: table.ID}).Last(&betHistory)
+	var waitingList []db.WaitingList
+	db.DB.Where(&db.WaitingList{Ready: true, RoomID: table.RoomID}).Find(&waitingList)
+
+	response := &TableSchemaResponse{
+		ID:    table.ID,
+		Round: table.Round,
+		Done:  table.Done,
+		Pot:   table.Pot,
+		CurrentTurn: TurnSchemaResponse{
+			UserID: table.UserID,
+		},
+		CommonCards: cardsToCardsResponse(table.Cards),
+		OwnCards:    cardsToCardsResponse(userTableCardsToCards(ownCards)),
+		BestCombination: CombinationSchemaResponse{
+			ID:                  bestCombination.CombinationID,
+			Name:                bestCombination.Combination.Name,
+			SelectedCommonCards: cardsToCardsResponse(combinationDetailCardsToCards(combinationDetailCards)),
+		},
+		LatestBet: BetSchemaResponse{
+			UserID: betHistory.UserID,
+			Action: ActionSchemaResponse{
+				ID:     betHistory.ActionID,
+				Name:   betHistory.Action.Name,
+				Amount: betHistory.Amount,
+			},
+		},
+		Players: waitingListToPlayers(waitingList),
+		// only available when the game is done.
+		Results: waitingListToResults(waitingList, table.ID),
+	}
+
+	return response, nil
+}
+
+func GetTableHandler(c *fiber.Ctx) error {
+	type Query struct {
+		UserID uint
+	}
+	var query Query
+	tableID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		e := routes.NewErrorResponse(
+			[]string{"Table not found"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	c.QueryParser(&query)
+	if query.UserID == 0 {
+		e := routes.NewErrorResponse(
+			[]string{"Please provide your user id"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	response, err := getTableInfo(tableID, query.UserID)
+	if err != nil {
+		e := routes.NewErrorResponse(
+			[]string{err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	return c.Status(fiber.StatusOK).JSON(response)
 }
