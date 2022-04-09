@@ -83,7 +83,7 @@ func getUserById(id int) (*db.User, bool) {
 func SignUpHandler(c *fiber.Ctx) error {
 	user := new(UserAccountSignUpBody)
 	if err := c.BodyParser(user); err != nil {
-		e := routes.NewErrorResponse([]string{"Unknown error"})
+		e := routes.NewErrorResponse([]string{"Can not parse body, try to include Content-Type: application/json in your request's header"})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
@@ -96,7 +96,7 @@ func SignUpHandler(c *fiber.Ctx) error {
 
 	u, ok := createAccount(user)
 	if !ok {
-		e := routes.NewErrorResponse([]string{"Unknown error"})
+		e := routes.NewErrorResponse([]string{"Can not access database"})
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
