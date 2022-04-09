@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../forms/sign_in_form.dart';
+
 class SignInPage extends StatelessWidget {
   static const String routeName = '/signIn';
 
@@ -11,10 +13,10 @@ class SignInPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: const Center(child: Text('Login Page works!')),
-    );
+        appBar: AppBar(
+          title: Text(title),
+        ),
+        body: Container(
+            padding: const EdgeInsets.all(20.0), child: const SignInForm()));
   }
 }
