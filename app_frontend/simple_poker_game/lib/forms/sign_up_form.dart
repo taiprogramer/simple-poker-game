@@ -15,8 +15,8 @@ class SignUpForm extends StatefulWidget {
 class SignUpFormState extends State<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
 
-  String username = "";
-  String password = "";
+  String username = '';
+  String password = '';
 
   @override
   Widget build(BuildContext context) {
