@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:simple_poker_game/pages/sign_in_page.dart';
 import 'package:simple_poker_game/services/auth/auth_service.dart';
 
@@ -70,7 +71,8 @@ class SignUpFormState extends State<SignUpForm> {
                         UserCredential(username: username, password: password));
                     Navigator.pushNamed(context, SignInPage.routeName);
                   } catch (e) {
-                    // Toast here
+                    Fluttertoast.showToast(
+                        msg: e.toString(), gravity: ToastGravity.CENTER);
                   }
                 }
               },

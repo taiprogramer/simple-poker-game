@@ -27,7 +27,8 @@ class AuthService {
     List<String> l = await response.transform(utf8.decoder).toList();
 
     if (response.statusCode == HttpStatus.badRequest) {
-      throw Exception(l.elementAt(0));
+      List<dynamic> errors = json.decode(l.elementAt(0))['error_messages'];
+      throw Exception(errors.elementAt(0));
     }
 
     return User.fromMap(json.decode(l.elementAt(0)));
