@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:simple_poker_game/services/auth/auth_service.dart';
 
 class SignInForm extends StatefulWidget {
   const SignInForm({Key? key}) : super(key: key);
@@ -11,6 +13,10 @@ class SignInForm extends StatefulWidget {
 
 class SignInFormState extends State<SignInForm> {
   final _formKey = GlobalKey<FormState>();
+
+  String username = '';
+  String password = '';
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -25,6 +31,9 @@ class SignInFormState extends State<SignInForm> {
           Container(
               margin: const EdgeInsets.only(top: 10.0),
               child: TextFormField(
+                onSaved: (String? value) {
+                  username = value ?? '';
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your username';
@@ -38,6 +47,9 @@ class SignInFormState extends State<SignInForm> {
           Container(
               margin: const EdgeInsets.only(top: 10.0),
               child: TextFormField(
+                onSaved: (String? value) {
+                  password = value ?? '';
+                },
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -50,8 +62,18 @@ class SignInFormState extends State<SignInForm> {
                     labelText: 'Enter your password'),
               )),
           ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {}
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  try {
+                    // must be saved in somewhere (on local machine)
+                    final accessToken = await AuthService.signIn(
+                        UserCredential(username: username, password: password));
+                  } catch (e) {
+                    Fluttertoast.showToast(
+                        msg: e.toString(), gravity: ToastGravity.CENTER);
+                  }
+                }
               },
               child: const Text('Sign in'))
         ],
