@@ -1,0 +1,19 @@
+// Wrapper of 'dart:io' HttpClient
+// provide: simple static methods with default value for common parameters
+import 'dart:io';
+
+import 'config.dart';
+
+class CompactHttpClient {
+  static final HttpClient _http = HttpClient();
+  static final String _host = ServiceConfig.getHost();
+  static final int _port = ServiceConfig.getPort();
+
+  static Future<HttpClientResponse> post(String body, String endPoint) async {
+    HttpClientRequest request = await _http.post(_host, _port, endPoint);
+    request.headers.add(HttpHeaders.contentTypeHeader, 'application/json');
+    request.write(body);
+    final response = await request.close();
+    return response;
+  }
+}

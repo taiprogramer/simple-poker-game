@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../models/user.dart';
-import '../config.dart';
+import '../compact_http_client.dart';
 
 class UserCredential {
   final String username;
@@ -12,19 +12,13 @@ class UserCredential {
 }
 
 class AuthService {
-  static final String host = ServiceConfig.getHost();
-  static final int port = ServiceConfig.getPort();
-  static const String userEndPoint = '/user';
-  static const String authEndPoint = '/auth';
-  static final HttpClient http = HttpClient();
+  static const String _userEndPoint = '/user';
+  static const String _authEndPoint = '/auth';
 
   static Future<User> signUp(UserCredential credential) async {
-    HttpClientRequest request = await http.post(host, port, userEndPoint);
-
-    request.headers.add(HttpHeaders.contentTypeHeader, 'application/json');
-    request.write(
-        '{"username": "${credential.username}", "password": "${credential.password}"}');
-    final response = await request.close();
+    final response = await CompactHttpClient.post(
+        '{"username": "${credential.username}", "password": "${credential.password}"}',
+        _userEndPoint);
     List<String> l = await response.transform(utf8.decoder).toList();
 
     if (response.statusCode == HttpStatus.badRequest) {
@@ -38,12 +32,9 @@ class AuthService {
   // return: access_token (JWT format) when succeed
   // throw: Exception when fail
   static Future<String> signIn(UserCredential credential) async {
-    HttpClientRequest request = await http.post(host, port, authEndPoint);
-
-    request.headers.add(HttpHeaders.contentTypeHeader, 'application/json');
-    request.write(
-        '{"username": "${credential.username}", "password": "${credential.password}"}');
-    final response = await request.close();
+    final response = await CompactHttpClient.post(
+        '{"username": "${credential.username}", "password": "${credential.password}"}',
+        _authEndPoint);
     List<String> l = await response.transform(utf8.decoder).toList();
 
     if (response.statusCode == HttpStatus.badRequest) {
