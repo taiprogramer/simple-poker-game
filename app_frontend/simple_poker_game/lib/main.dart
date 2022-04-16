@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:simple_poker_game/pages/texas_holdem_page.dart';
 
 import 'pages/home_page.dart';
 import 'pages/sign_in_page.dart';
@@ -18,6 +19,8 @@ class MyApp extends StatelessWidget {
     var routes = <String, WidgetBuilder>{
       SignInPage.routeName: (BuildContext context) => const SignInPage(),
       SignUpPage.routeName: (BuildContext context) => const SignUpPage(),
+      TexasHoldemPage.routeName: (BuildContext context) =>
+          const TexasHoldemPage(),
     };
     return MaterialApp(
       title: 'Simple Poker Game',
