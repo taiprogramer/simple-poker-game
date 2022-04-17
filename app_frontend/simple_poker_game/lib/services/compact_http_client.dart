@@ -16,4 +16,10 @@ class CompactHttpClient {
     final response = await request.close();
     return response;
   }
+
+  static Future<HttpClientResponse> get(String query, String endPoint) async {
+    String url = endPoint + query;
+    HttpClientRequest request = await _http.get(_host, _port, url);
+    return await request.close();
+  }
 }
