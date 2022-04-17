@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-class TexasHoldemPage extends StatelessWidget {
+import '../models/room.dart';
+import '../services/room/room_service.dart';
+
+class TexasHoldemPage extends StatefulWidget {
   static const String routeName = '/texasHoldem';
 
   const TexasHoldemPage({Key? key, this.title = 'Simple Poker Game'})
@@ -9,10 +12,23 @@ class TexasHoldemPage extends StatelessWidget {
   final String title;
 
   @override
+  State<TexasHoldemPage> createState() => _TexasHoldemPageState();
+}
+
+class _TexasHoldemPageState extends State<TexasHoldemPage> {
+  late Future<List<Room>> rooms;
+
+  @override
+  void initState() {
+    super.initState();
+    rooms = RoomService.listRoom(0, 8);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(title),
+          title: Text(widget.title),
         ),
         body: SingleChildScrollView(
             child: Container(
@@ -42,56 +58,30 @@ class TexasHoldemPage extends StatelessWidget {
               ),
             ),
             SizedBox(
-                height: 300,
-                child: SingleChildScrollView(
-                    child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(
-                          private: false,
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(
-                          private: false,
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(
-                          private: false,
-                        )
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: const [
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(),
-                        _RoomWidget(
-                          private: false,
-                        )
-                      ],
-                    ),
-                  ],
-                ))),
+              height: 300,
+              child: FutureBuilder<List<Room>>(
+                future: rooms,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4, mainAxisExtent: 100),
+                        itemCount: snapshot.data!.length,
+                        itemBuilder: (BuildContext ctx, index) {
+                          return _RoomWidget(
+                            private: snapshot.data![index].private,
+                            code: snapshot.data![index].code,
+                          );
+                        });
+                  } else if (snapshot.hasError) {
+                    return const Text(
+                        'Can not connect to the server. Check your internet connection!');
+                  }
+                  return const CircularProgressIndicator();
+                },
+              ),
+            ),
             ElevatedButton(onPressed: () {}, child: const Text('New room'))
           ]),
         )));
