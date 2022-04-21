@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 
 import '../models/room.dart';
 import '../services/room/room_service.dart';
@@ -82,7 +83,12 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                 },
               ),
             ),
-            ElevatedButton(onPressed: () {}, child: const Text('New room'))
+            ElevatedButton(
+                onPressed: () async {
+                  int userID = AppLocalStorage.getItem("user_id");
+                  RoomService.newRoom(userID: userID);
+                },
+                child: const Text('New room'))
           ]),
         )));
   }

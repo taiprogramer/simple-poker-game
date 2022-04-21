@@ -69,9 +69,11 @@ class SignInFormState extends State<SignInForm> {
                   _formKey.currentState!.save();
                   try {
                     // must be saved in somewhere (on local machine)
-                    final accessToken = await AuthService.signIn(
+                    final authentication = await AuthService.signIn(
                         UserCredential(username: username, password: password));
-                    AppLocalStorage.setItem('access_token', accessToken);
+                    AppLocalStorage.setItem(
+                        'access_token', authentication.accessToken);
+                    AppLocalStorage.setItem('user_id', authentication.userID);
                     Navigator.pushReplacementNamed(
                         context, TexasHoldemPage.routeName);
                   } catch (e) {

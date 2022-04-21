@@ -11,6 +11,13 @@ class UserCredential {
   UserCredential({this.username = '', this.password = ''});
 }
 
+class Authentication {
+  final String accessToken;
+  final int userID;
+
+  Authentication({this.accessToken = '', this.userID = 0});
+}
+
 class AuthService {
   static const String _userEndPoint = '/user';
   static const String _authEndPoint = '/auth';
@@ -29,9 +36,9 @@ class AuthService {
     return User.fromMap(json.decode(l.elementAt(0)));
   }
 
-  // return: access_token (JWT format) when succeed
+  // return: Authentication object when succeed
   // throw: Exception when fail
-  static Future<String> signIn(UserCredential credential) async {
+  static Future<Authentication> signIn(UserCredential credential) async {
     final response = await CompactHttpClient.post(
         '{"username": "${credential.username}", "password": "${credential.password}"}',
         _authEndPoint);
@@ -41,6 +48,12 @@ class AuthService {
       List<dynamic> errors = json.decode(l.elementAt(0))['error_messages'];
       throw Exception(errors.elementAt(0));
     }
-    return json.decode(l.elementAt(0))['access_token'];
+
+    String accessToken = json.decode(l.elementAt(0))['access_token'];
+    int userID = json.decode(l.elementAt(0))['user_id'];
+
+    Authentication authentication =
+        Authentication(userID: userID, accessToken: accessToken);
+    return authentication;
   }
 }

@@ -9,9 +9,11 @@ class CompactHttpClient {
   static final String _host = ServiceConfig.getHost();
   static final int _port = ServiceConfig.getPort();
 
-  static Future<HttpClientResponse> post(String body, String endPoint) async {
+  static Future<HttpClientResponse> post(String body, String endPoint,
+      [String accessToken = '']) async {
     HttpClientRequest request = await _http.post(_host, _port, endPoint);
     request.headers.add(HttpHeaders.contentTypeHeader, 'application/json');
+    request.headers.add(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
     request.write(body);
     final response = await request.close();
     return response;

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:simple_poker_game/services/local_storage/local_storage.dart';
+
 import '../../models/room.dart';
 import '../compact_http_client.dart';
 
@@ -13,5 +15,17 @@ class RoomService {
     List<dynamic> body = jsonDecode(stringData);
     List<Room> rooms = body.map((item) => Room.fromMap(item)).toList();
     return rooms;
+  }
+
+  static Future<Room> newRoom({int userID = 0, String password = ''}) async {
+    String accessToken = AppLocalStorage.getItem('access_token');
+    final res = await CompactHttpClient.post(
+        '{"user_id": $userID, "password": "$password"}',
+        _roomEndPoint,
+        accessToken);
+    String stringData = await res.transform(utf8.decoder).join();
+    dynamic body = jsonDecode(stringData);
+    Room room = Room.fromMap(body);
+    return room;
   }
 }
