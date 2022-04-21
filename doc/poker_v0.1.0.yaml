@@ -92,6 +92,8 @@ paths:
                 properties:
                   access_token:
                     type: string
+                  user_id:
+                    type: integer
         "400":
           description: Sign in fail.
           content:

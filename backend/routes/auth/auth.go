@@ -25,6 +25,7 @@ type UserSchemaResponse struct {
 
 type SignInSuccessResponse struct {
 	AccessToken string `json:"access_token"`
+	UserID      uint   `json:"user_id"`
 }
 
 // Bearer Token Authorization Middleware (JWT)
@@ -59,16 +60,17 @@ func createAccount(body *UserAccountSignUpBody) (*UserSchemaResponse, bool) {
 	}, ok
 }
 
-func userAndPasswordCorrect(body *UserAccountSignUpBody) bool {
+// return user_id if username & password are correct
+func userAndPasswordCorrect(body *UserAccountSignUpBody) uint {
 	var user db.User
 	result := db.DB.Where("username = ?", body.Username).First(&user)
 	if result.RowsAffected == 0 {
-		return false
+		return 0
 	}
 	if !secure.ComparePassword(body.Password, user.HashedPassword) {
-		return false
+		return 0
 	}
-	return true
+	return user.ID
 }
 
 func getUserById(id int) (*db.User, bool) {
@@ -110,7 +112,9 @@ func SignInHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
-	if !userAndPasswordCorrect(user) {
+	userID := userAndPasswordCorrect(user)
+
+	if userID == 0 {
 		e := routes.NewErrorResponse([]string{
 			"Incorrect username or password",
 		})
@@ -126,6 +130,7 @@ func SignInHandler(c *fiber.Ctx) error {
 	}
 	response := SignInSuccessResponse{
 		AccessToken: tokenString,
+		UserID:      userID,
 	}
 	return c.Status(fiber.StatusCreated).JSON(response)
 }
