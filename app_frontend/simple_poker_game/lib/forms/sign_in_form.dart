@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:simple_poker_game/pages/texas_holdem_page.dart';
 import 'package:simple_poker_game/services/auth/auth_service.dart';
+import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 
 class SignInForm extends StatefulWidget {
   const SignInForm({Key? key}) : super(key: key);
@@ -70,6 +71,7 @@ class SignInFormState extends State<SignInForm> {
                     // must be saved in somewhere (on local machine)
                     final accessToken = await AuthService.signIn(
                         UserCredential(username: username, password: password));
+                    AppLocalStorage.setItem('access_token', accessToken);
                     Navigator.pushReplacementNamed(
                         context, TexasHoldemPage.routeName);
                   } catch (e) {
