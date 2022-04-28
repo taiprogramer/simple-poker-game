@@ -116,9 +116,10 @@ class _RoomWidget extends StatelessWidget {
               image: DecorationImage(image: roomImage),
             ),
           ),
-          const Text(
-            '#FAK0',
-            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+          Text(
+            code,
+            style: const TextStyle(
+                color: Colors.blue, fontWeight: FontWeight.bold),
           )
         ],
       ),
