@@ -2,7 +2,9 @@ package room
 
 import (
 	"errors"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
@@ -104,9 +106,22 @@ func isAuthenticatedUser(userID uint, username interface{}) bool {
 	return user.Username == username
 }
 
-// TODO
+// Inspired by YuMy
+// Note: I know this implementation has a draw back that means collision can be
+// occurred. Maybe this implementation will be replaced in the future.
 func getNextUniqueCode() string {
-	return "[must be unique for each room]"
+	rand.Seed(time.Now().UnixNano())
+	var code string
+	charList := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+		"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+		"O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+
+	for i := 0; i < 4; i++ {
+		index := rand.Int() % len(charList)
+		code += charList[index]
+	}
+
+	return code
 }
 
 func createNewRoom(userID uint, private bool, password string) (*RoomSchemaResponse, bool) {
