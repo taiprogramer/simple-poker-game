@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_poker_game/pages/room_texas_holdem_page.dart';
 import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 
 import '../models/room.dart';
@@ -123,7 +124,9 @@ class _RoomWidget extends StatelessWidget {
           )
         ],
       ),
-      onTap: () {},
+      onTap: () {
+        Navigator.pushReplacementNamed(context, RoomTexasHoldemPage.routeName);
+      },
     );
   }
 }
