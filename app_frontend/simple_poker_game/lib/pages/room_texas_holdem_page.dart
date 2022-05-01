@@ -29,13 +29,53 @@ class RoomTexasHoldemPage extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: 300,
+            height: 350,
             child: Container(
-              color: Colors.red,
+              decoration: const BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('assets/images/poker_table.jpg'))),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _PlayerCircle(),
+                      Container(
+                        child: _PlayerCircle(),
+                        margin: const EdgeInsets.only(bottom: 40.0),
+                      ),
+                      Container(
+                        child: _PlayerCircle(),
+                        margin: const EdgeInsets.only(bottom: 40.0),
+                      ),
+                      _PlayerCircle(),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _PlayerCircle(),
+                      _PlayerCircle(),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _PlayerCircle(),
+                      Container(
+                        margin: const EdgeInsets.only(top: 40.0),
+                        child: _PlayerCircle(),
+                      ),
+                      _PlayerCircle(),
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -46,7 +86,7 @@ class RoomTexasHoldemPage extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -55,7 +95,7 @@ class RoomTexasHoldemPage extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -67,6 +107,38 @@ class RoomTexasHoldemPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PlayerCircle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('assets/images/active_tick.png'))),
+        ),
+        Container(
+          alignment: Alignment.center,
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+              color: Colors.blue, borderRadius: BorderRadius.circular(100)),
+          child: const Text(
+            'G',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        const Text(
+          '\$ 999',
+          style: TextStyle(color: Colors.red, backgroundColor: Colors.yellow),
+        )
+      ],
     );
   }
 }
