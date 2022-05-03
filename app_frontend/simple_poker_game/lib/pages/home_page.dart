@@ -14,16 +14,35 @@ class HomePage extends StatelessWidget {
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, SignUpPage.routeName);
-                },
-                child: const Text('Sign up')),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, SignInPage.routeName);
-                },
-                child: const Text('Sign in')),
+            SizedBox(
+              width: 200,
+              height: 45,
+              child: ElevatedButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)))),
+                  onPressed: () {
+                    Navigator.pushNamed(context, SignInPage.routeName);
+                  },
+                  child: const Text('Sign in')),
+            ),
+            Container(
+              padding: const EdgeInsets.all(5),
+            ),
+            SizedBox(
+              width: 200,
+              height: 45,
+              child: OutlinedButton(
+                  style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)))),
+                  onPressed: () {
+                    Navigator.pushNamed(context, SignUpPage.routeName);
+                  },
+                  child: const Text('Create new account')),
+            ),
           ],
         )));
   }
