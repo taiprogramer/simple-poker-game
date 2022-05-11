@@ -22,6 +22,11 @@ Done!
 
 You can preview database schema with [pgModeler](https://pgmodeler.io/) tool.
 
+### Building
+
+See [BUILDING.md](./BUILDING.md) for instructions on how to build & run Simple
+poker game from source.
+
 ## Contributing
 
 I am working hard on this project because this is my thesis, all helps are
