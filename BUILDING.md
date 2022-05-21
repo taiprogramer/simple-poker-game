@@ -47,6 +47,17 @@ gow run main.go
 
 ### Client
 
+- Setting up dot environment
+
+```sh
+cp app_frontend/simple_poker_game/dot_env app_frontend/simple_poker_game/.env
+```
+
+| Variable         | Description                          |
+| ---------------- | ------------------------------------ |
+| API_SERVER_HOST= | Hostname or IP address of the server |
+| API_SERVER_PORT= | Port of the server                   |
+
 #### Mobile app: Android
 
 - Connecting your Android phone using adb.
