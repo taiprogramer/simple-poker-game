@@ -23,7 +23,11 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
   @override
   void initState() {
     super.initState();
-    rooms = RoomService.listRoom(0, 8);
+    rooms = _fetchListRoom();
+  }
+
+  Future<List<Room>> _fetchListRoom() {
+    return RoomService.listRoom(0, 8);
   }
 
   @override
@@ -65,7 +69,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
               ),
             ),
             SizedBox(
-              height: 300,
+              height: 250,
               child: FutureBuilder<List<Room>>(
                 future: rooms,
                 builder: (context, snapshot) {
@@ -73,7 +77,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                     return GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4, mainAxisExtent: 100),
+                                crossAxisCount: 4, mainAxisExtent: 130),
                         itemCount: snapshot.data!.length,
                         itemBuilder: (BuildContext ctx, index) {
                           return _RoomWidget(
@@ -96,7 +100,10 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                             borderRadius: BorderRadius.circular(20)))),
                 onPressed: () async {
                   int userID = AppLocalStorage.getItem("user_id");
-                  RoomService.newRoom(userID: userID);
+                  await RoomService.newRoom(userID: userID);
+                  setState(() {
+                    rooms = _fetchListRoom();
+                  });
                 },
                 child: const Text('New room')),
           ]),
