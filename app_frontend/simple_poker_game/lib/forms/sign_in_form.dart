@@ -99,9 +99,9 @@ class SignInFormState extends State<SignInForm> {
                                       username: username, password: password));
                               await Future.delayed(
                                   const Duration(microseconds: 500));
-                              AppLocalStorage.setItem(
+                              await AppLocalStorage.setItem(
                                   'access_token', authentication.accessToken);
-                              AppLocalStorage.setItem(
+                              await AppLocalStorage.setItem(
                                   'user_id', authentication.userID);
                               Navigator.pushReplacementNamed(
                                   context, TexasHoldemPage.routeName);

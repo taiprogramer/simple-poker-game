@@ -103,9 +103,9 @@ class SignUpFormState extends State<SignUpForm> {
                                     UserCredential(
                                         username: user.username,
                                         password: password));
-                                AppLocalStorage.setItem(
+                                await AppLocalStorage.setItem(
                                     'access_token', authentication.accessToken);
-                                AppLocalStorage.setItem(
+                                await AppLocalStorage.setItem(
                                     'user_id', authentication.userID);
                                 await Future.delayed(
                                     const Duration(microseconds: 500));
