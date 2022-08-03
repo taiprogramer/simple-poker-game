@@ -39,7 +39,10 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
             const Center(
                 child: Text(
               'Texas Hold\'em',
-              style: TextStyle(fontSize: 36.0, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 36.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pink),
             )),
             Container(
               margin: const EdgeInsets.only(top: 20.0, bottom: 20.0),
@@ -47,13 +50,15 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                 children: [
                   Expanded(
                       child: TextFormField(
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Search by code'),
+                    decoration:
+                        const InputDecoration(labelText: 'Search by code'),
                   )),
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.search),
+                    icon: const Icon(
+                      Icons.search,
+                      color: Colors.pinkAccent,
+                    ),
                     iconSize: 30.0,
                   )
                 ],
@@ -85,11 +90,15 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
               ),
             ),
             ElevatedButton(
+                style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)))),
                 onPressed: () async {
                   int userID = AppLocalStorage.getItem("user_id");
                   RoomService.newRoom(userID: userID);
                 },
-                child: const Text('New room'))
+                child: const Text('New room')),
           ]),
         )));
   }
