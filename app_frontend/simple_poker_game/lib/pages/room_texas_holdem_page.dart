@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
-class RoomTexasHoldemPage extends StatelessWidget {
+class RoomTexasHoldemPage extends StatefulWidget {
   static const String routeName = '/roomTexasHoldem';
   const RoomTexasHoldemPage({Key? key}) : super(key: key);
+
+  @override
+  State<RoomTexasHoldemPage> createState() => _RoomTexasHoldemPageState();
+}
+
+class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
+  Widget _playerInSlot({int slot = -1}) {
+    return _PlayerCircle();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,34 +49,34 @@ class RoomTexasHoldemPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _PlayerCircle(),
+                      _playerInSlot(slot: 3),
                       Container(
-                        child: _PlayerCircle(),
+                        child: _playerInSlot(slot: 1),
                         margin: const EdgeInsets.only(bottom: 40.0),
                       ),
                       Container(
-                        child: _PlayerCircle(),
+                        child: _playerInSlot(slot: 2),
                         margin: const EdgeInsets.only(bottom: 40.0),
                       ),
-                      _PlayerCircle(),
+                      _playerInSlot(slot: 4),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _PlayerCircle(),
-                      _PlayerCircle(),
+                      _playerInSlot(slot: 5),
+                      _playerInSlot(slot: 6),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _PlayerCircle(),
+                      _playerInSlot(slot: 7),
                       Container(
                         margin: const EdgeInsets.only(top: 40.0),
-                        child: _PlayerCircle(),
+                        child: _playerInSlot(slot: 0), // current sign in user
                       ),
-                      _PlayerCircle(),
+                      _playerInSlot(slot: 8),
                     ],
                   )
                 ],
