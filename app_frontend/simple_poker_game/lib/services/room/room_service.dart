@@ -28,4 +28,14 @@ class RoomService {
     Room room = Room.fromMap(body);
     return room;
   }
+
+  static Future<Room> getRoom({int roomID = 0}) async {
+    String accessToken = AppLocalStorage.getItem('access_token');
+    final res =
+        await CompactHttpClient.get('/$roomID', _roomEndPoint, accessToken);
+    String stringData = await res.transform(utf8.decoder).join();
+    dynamic body = jsonDecode(stringData);
+    Room room = Room.fromMap(body);
+    return room;
+  }
 }

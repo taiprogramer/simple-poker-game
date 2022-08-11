@@ -109,10 +109,10 @@ class SignUpFormState extends State<SignUpForm> {
                                     'user_id', authentication.userID);
                                 await Future.delayed(
                                     const Duration(microseconds: 500));
-                                Navigator.pushReplacementNamed(
+                                Navigator.pushNamed(
                                     context, TexasHoldemPage.routeName);
                               } catch (_) {
-                                Navigator.pushReplacementNamed(
+                                Navigator.pushNamed(
                                     context, SignInPage.routeName);
                               }
                             } catch (e) {

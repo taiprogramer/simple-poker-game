@@ -103,7 +103,7 @@ class SignInFormState extends State<SignInForm> {
                                   'access_token', authentication.accessToken);
                               await AppLocalStorage.setItem(
                                   'user_id', authentication.userID);
-                              Navigator.pushReplacementNamed(
+                              Navigator.pushNamed(
                                   context, TexasHoldemPage.routeName);
                             } catch (e) {
                               Fluttertoast.showToast(

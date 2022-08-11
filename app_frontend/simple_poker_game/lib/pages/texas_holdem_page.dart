@@ -100,10 +100,11 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                             borderRadius: BorderRadius.circular(20)))),
                 onPressed: () async {
                   int userID = AppLocalStorage.getItem("user_id");
-                  await RoomService.newRoom(userID: userID);
-                  setState(() {
-                    rooms = _fetchListRoom();
-                  });
+                  try {
+                    final room = await RoomService.newRoom(userID: userID);
+                    await AppLocalStorage.setItem("room_id", room.id);
+                    Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
+                  } catch (_) {}
                 },
                 child: const Text('New room')),
           ]),

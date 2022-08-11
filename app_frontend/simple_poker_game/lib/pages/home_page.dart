@@ -23,8 +23,7 @@ class HomePage extends StatelessWidget {
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20)))),
                   onPressed: () {
-                    Navigator.pushReplacementNamed(
-                        context, SignInPage.routeName);
+                    Navigator.pushNamed(context, SignInPage.routeName);
                   },
                   child: const Text('Sign in')),
             ),
@@ -40,8 +39,7 @@ class HomePage extends StatelessWidget {
                           RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20)))),
                   onPressed: () {
-                    Navigator.pushReplacementNamed(
-                        context, SignUpPage.routeName);
+                    Navigator.pushNamed(context, SignUpPage.routeName);
                   },
                   child: const Text('Create new account')),
             ),

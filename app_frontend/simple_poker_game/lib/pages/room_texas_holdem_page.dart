@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:simple_poker_game/models/room.dart';
+import 'package:simple_poker_game/services/local_storage/local_storage.dart';
+import 'package:simple_poker_game/services/room/room_service.dart';
 
 class RoomTexasHoldemPage extends StatefulWidget {
   static const String routeName = '/roomTexasHoldem';
@@ -10,7 +13,37 @@ class RoomTexasHoldemPage extends StatefulWidget {
 
 class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   Widget _playerInSlot({int slot = -1}) {
+    final index = slot - 1; // because slot count from 1
+    // current sign in user
+    if (slot == 0) {
+      return _PlayerCircle();
+    }
+    // slot is out of range
+    if (slot > room.users.length) {
+      return const Text("");
+    }
+    // skip current sign in user
+    if (room.users.elementAt(index).id == AppLocalStorage.getItem('user_id')) {
+      return const Text("");
+    }
+
     return _PlayerCircle();
+  }
+
+  Room room = Room();
+
+  Future<void> _fetchData() async {
+    final roomData =
+        await RoomService.getRoom(roomID: AppLocalStorage.getItem("room_id"));
+    setState(() {
+      room = roomData;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
   }
 
   @override
@@ -31,7 +64,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                   style: TextStyle(fontSize: 24),
                 ),
                 Text(
-                  '75800',
+                  '0',
                   style: TextStyle(fontSize: 24),
                 ),
               ],
