@@ -11,6 +11,7 @@
         - flutter_dotenv, Copyright (c) 2018 java-james
         - fluttertoast, Copyright (c) 2020 Karthik Ponnam
         - localstorage, Copyright 2018 Andrei Lesnitsky
+        - gofiber/websocket, Copyright (c) 2020 Fiber
 -----------------------------------------------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
