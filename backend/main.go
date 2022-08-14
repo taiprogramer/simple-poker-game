@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/websocket/v2"
 	"github.com/joho/godotenv"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	authRouter "github.com/taiprogramer/simple-poker-game/backend/routes/auth"
@@ -27,6 +29,37 @@ func main() {
 	app.Post("/auth", authRouter.SignInHandler)
 	app.Get("/room", roomRouter.GetListRoomsHandler)
 	app.Get("/room/:id", roomRouter.GetSpecificRoomHandler)
+
+	// Websocket
+	app.Use("/ws", func(c *fiber.Ctx) error {
+		// IsWebSocketUpgrade returns true if the client
+		// requested upgrade to the WebSocket protocol.
+		if websocket.IsWebSocketUpgrade(c) {
+			c.Locals("allowed", true)
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	})
+
+	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
+		var (
+			mt  int
+			msg []byte
+			err error
+		)
+		for {
+			if mt, msg, err = c.ReadMessage(); err != nil {
+				log.Println("read:", err)
+				break
+			}
+			log.Printf("recv: %s", msg)
+
+			if err = c.WriteMessage(mt, msg); err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+	}))
 
 	// Bearer Token is Required
 	app.Use(authRouter.JWTMiddleWare())
