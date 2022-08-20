@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
@@ -10,6 +9,7 @@ import (
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	authRouter "github.com/taiprogramer/simple-poker-game/backend/routes/auth"
 	roomRouter "github.com/taiprogramer/simple-poker-game/backend/routes/room"
+	socketRouter "github.com/taiprogramer/simple-poker-game/backend/routes/socket"
 )
 
 func main() {
@@ -41,25 +41,7 @@ func main() {
 		return fiber.ErrUpgradeRequired
 	})
 
-	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
-		var (
-			mt  int
-			msg []byte
-			err error
-		)
-		for {
-			if mt, msg, err = c.ReadMessage(); err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("recv: %s", msg)
-
-			if err = c.WriteMessage(mt, msg); err != nil {
-				log.Println("write:", err)
-				break
-			}
-		}
-	}))
+	app.Get("/ws/:user_id", websocket.New(socketRouter.SocketHandler))
 
 	// Bearer Token is Required
 	app.Use(authRouter.JWTMiddleWare())
