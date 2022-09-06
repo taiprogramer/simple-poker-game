@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_poker_game/models/room.dart';
 import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 import 'package:simple_poker_game/services/room/room_service.dart';
+import 'dart:math' as math;
 
 class RoomTexasHoldemPage extends StatefulWidget {
   static const String routeName = '/roomTexasHoldem';
@@ -156,31 +157,65 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
 class _PlayerCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('assets/images/active_tick.png'))),
-        ),
-        Container(
-          alignment: Alignment.center,
-          height: 50,
-          width: 50,
-          decoration: BoxDecoration(
-              color: Colors.blue, borderRadius: BorderRadius.circular(100)),
-          child: const Text(
-            'G',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        const Text(
-          '\$ 999',
-          style: TextStyle(color: Colors.red, backgroundColor: Colors.yellow),
-        )
-      ],
-    );
+    return SizedBox(
+        width: 55,
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage('assets/images/active_tick.png'))),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(100)),
+                  child: const Text(
+                    'G',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const Text(
+                  '\$ 999',
+                  style: TextStyle(
+                      color: Colors.red, backgroundColor: Colors.yellow),
+                )
+              ],
+            ),
+            Positioned(
+                left: -10,
+                child: Row(
+                  children: [
+                    Transform.rotate(
+                      angle: -math.pi / 8,
+                      child: Container(
+                          width: 35,
+                          height: 55,
+                          decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/images/deck_of_cards/CLUB-1.png')))),
+                    ),
+                    Transform.rotate(
+                      angle: math.pi / 8,
+                      child: Container(
+                          width: 35,
+                          height: 55,
+                          decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/images/deck_of_cards/SPADE-11-JACK.png')))),
+                    )
+                  ],
+                )),
+          ],
+        ));
   }
 }

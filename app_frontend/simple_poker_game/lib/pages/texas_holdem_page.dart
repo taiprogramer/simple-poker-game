@@ -81,6 +81,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                         itemCount: snapshot.data!.length,
                         itemBuilder: (BuildContext ctx, index) {
                           return _RoomWidget(
+                            id: snapshot.data![index].id,
                             private: snapshot.data![index].private,
                             code: snapshot.data![index].code,
                           );
@@ -113,10 +114,12 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
 }
 
 class _RoomWidget extends StatelessWidget {
+  final int id;
   final String code;
   final bool private;
 
-  const _RoomWidget({Key? key, this.code = '', this.private = true})
+  const _RoomWidget(
+      {Key? key, this.id = 0, this.code = '', this.private = true})
       : super(key: key);
 
   @override
@@ -141,8 +144,9 @@ class _RoomWidget extends StatelessWidget {
           )
         ],
       ),
-      onTap: () {
-        Navigator.pushReplacementNamed(context, RoomTexasHoldemPage.routeName);
+      onTap: () async {
+        await AppLocalStorage.setItem("room_id", id);
+        Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
       },
     );
   }
