@@ -8,6 +8,7 @@ import (
 	roomRepo "github.com/taiprogramer/simple-poker-game/backend/repo/room"
 )
 
+// map userID to roomID
 var userInRooms map[int]int = make(map[int]int)
 
 func SocketHandler(c *websocket.Conn) {
@@ -16,8 +17,11 @@ func SocketHandler(c *websocket.Conn) {
 		msg []byte
 		err error
 	)
-	userInRooms[20] = 1
-	userInRooms[21] = 1
+
+	userID, _ := strconv.Atoi(c.Params("user_id"))
+	roomID, _ := strconv.Atoi(c.Query("room"))
+	userInRooms[userID] = roomID
+
 	for {
 		if mt, msg, err = c.ReadMessage(); err != nil {
 			log.Println("read:", err)
@@ -32,7 +36,6 @@ func SocketHandler(c *websocket.Conn) {
 	// when users leave the room (connection is closed), if they are the
 	// owner of the room, delete the room and transfer that room to the new
 	// owner.
-	userID, _ := strconv.Atoi(c.Params("user_id"))
 	roomID, roomExists := userInRooms[userID]
 	if !roomExists {
 		return
