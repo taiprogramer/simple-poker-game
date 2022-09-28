@@ -33,3 +33,9 @@ func DeleteWaitingListByUserID(userID int, waiting *db.WaitingList) {
 func DeleteWaitingListsByRoomID(roomID int) {
 	db.DB.Where("room_id = ?", roomID).Delete(&db.WaitingList{})
 }
+
+func GetWaitingListsByRoomID(roomID int) []db.WaitingList {
+	var waitingLists []db.WaitingList
+	db.DB.Where("room_id = ?", roomID).Find(&waitingLists)
+	return waitingLists
+}

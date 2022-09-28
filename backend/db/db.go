@@ -37,9 +37,9 @@ type Suit int
 
 const (
 	Diamond Suit = 0
-	Heart
-	Club
-	Spade
+	Heart   Suit = 1
+	Club    Suit = 2
+	Spade   Suit = 3
 )
 
 type Card struct {
