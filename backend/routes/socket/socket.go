@@ -31,6 +31,13 @@ var userInRooms map[int]int = make(map[int]int)
 // J1 -> J of HEART
 var roomCards map[int][]string = make(map[int][]string)
 
+type SocketConnection struct {
+	userID int
+	c      *websocket.Conn
+}
+
+var roomSocketConnections map[int][]SocketConnection = make(map[int][]SocketConnection)
+
 func randInt(min, max int) int {
 	return min + rand.Intn(max-min)
 }
@@ -94,35 +101,51 @@ func SocketHandler(c *websocket.Conn) {
 	// get the room
 	room, _ := roomRepo.FindRoomByID(roomID)
 
-	for {
-		if mt, msg, err = c.ReadMessage(); err == nil {
-			command := string(msg[:])
-			// start the game, after start, the game is in Stage 0
-			if strings.Compare(command, "start") == 0 {
-				// not the owner can not issue "start" command
-				if room.UserID != uint(userID) {
-					continue
-				}
-				/* Set up Stage 0
-				- create new table.
-				- add ready users to table.
-				- deal 2 cards for playing users.
-				*/
-				waitings := roomRepo.GetWaitingListsByRoomID(roomID)
+	connections, ok := roomSocketConnections[roomID]
+	if ok {
+		// notify for existing players when new user join room
+		for _, conn := range connections {
+			conn.c.WriteMessage(websocket.TextMessage, []byte("new user join room"))
+		}
+	}
 
-				shuffleCards(roomID)
-				for _, v := range waitings {
-					// add players to tables.
-					if v.Ready {
-						tableID := tableRepo.CreateNewTable(v.UserID, room.ID, 0, 0, false)
-						// deal 2 cards for playing users.
-						card1 := dealNextCard(roomID)
-						card2 := dealNextCard(roomID)
-						card1ID := getCardID(card1)
-						card2ID := getCardID(card2)
-						userTableCardRepo.AddNewCard(tableID, uint(userID), card1ID)
-						userTableCardRepo.AddNewCard(tableID, uint(userID), card2ID)
-					}
+	socketConn := SocketConnection{
+		c:      c,
+		userID: userID,
+	}
+
+	roomSocketConnections[roomID] = append(roomSocketConnections[roomID], socketConn)
+
+	for {
+		if mt, msg, err = c.ReadMessage(); err != nil {
+			break
+		}
+		command := string(msg[:])
+		// start the game, after start, the game is in Stage 0
+		if strings.Compare(command, "start") == 0 {
+			// not the owner can not issue "start" command
+			if room.UserID != uint(userID) {
+				continue
+			}
+			/* Set up Stage 0
+			- create new table.
+			- add ready users to table.
+			- deal 2 cards for playing users.
+			*/
+			waitings := roomRepo.GetWaitingListsByRoomID(roomID)
+
+			shuffleCards(roomID)
+			for _, v := range waitings {
+				// add players to tables.
+				if v.Ready {
+					tableID := tableRepo.CreateNewTable(v.UserID, room.ID, 0, 0, false)
+					// deal 2 cards for playing users.
+					card1 := dealNextCard(roomID)
+					card2 := dealNextCard(roomID)
+					card1ID := getCardID(card1)
+					card2ID := getCardID(card2)
+					userTableCardRepo.AddNewCard(tableID, uint(userID), card1ID)
+					userTableCardRepo.AddNewCard(tableID, uint(userID), card2ID)
 				}
 			}
 		}
@@ -132,6 +155,17 @@ func SocketHandler(c *websocket.Conn) {
 			break
 		}
 	}
+
+	// remove socket connection
+	i := 0
+	for _, socketConnection := range roomSocketConnections[roomID] {
+		if socketConnection.userID != userID {
+			roomSocketConnections[roomID][i] = socketConnection
+			i++
+		}
+	}
+	roomSocketConnections[roomID] = roomSocketConnections[roomID][:i]
+
 	// when users leave the room (connection is closed), if they are the
 	// owner of the room, delete the room and transfer that room to the new
 	// owner.
