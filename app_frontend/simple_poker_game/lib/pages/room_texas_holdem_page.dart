@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:simple_poker_game/models/room.dart';
 import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 import 'package:simple_poker_game/services/room/room_service.dart';
+import 'package:simple_poker_game/services/socket/socket.dart';
 import 'dart:math' as math;
 
 class RoomTexasHoldemPage extends StatefulWidget {
@@ -13,6 +14,35 @@ class RoomTexasHoldemPage extends StatefulWidget {
 }
 
 class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
+  Room room = Room();
+  late SocketInstance socketInstance;
+
+  Future<void> _fetchData() async {
+    final roomData =
+        await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
+    setState(() {
+      room = roomData;
+    });
+  }
+
+  void _socketListener(String msg) async {
+    if (msg == "new user join room") {
+      final roomData =
+          await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
+      setState(() {
+        room = roomData;
+      });
+    }
+  }
+
+  void _connectWebSocket() {
+    final userID = AppLocalStorage.getItem("user_id");
+    final roomID = AppLocalStorage.getItem('room_id');
+    socketInstance = SocketInstance(userID: userID, roomID: roomID);
+    socketInstance.connect();
+    socketInstance.listen(_socketListener);
+  }
+
   Widget _playerInSlot({int slot = -1}) {
     final index = slot - 1; // because slot count from 1
     // current sign in user
@@ -31,20 +61,11 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     return _PlayerCircle();
   }
 
-  Room room = Room();
-
-  Future<void> _fetchData() async {
-    final roomData =
-        await RoomService.getRoom(roomID: AppLocalStorage.getItem("room_id"));
-    setState(() {
-      room = roomData;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
     _fetchData();
+    _connectWebSocket();
   }
 
   @override
@@ -155,6 +176,21 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
 }
 
 class _PlayerCircle extends StatelessWidget {
+  final String shortName;
+  final int money;
+  final String card1ImageUrl;
+  final String card2ImageUrl;
+  final bool active;
+
+  const _PlayerCircle(
+      {Key? key,
+      this.shortName = 'G',
+      this.money = 0,
+      this.card1ImageUrl = '',
+      this.card2ImageUrl = '',
+      this.active = false})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -163,13 +199,15 @@ class _PlayerCircle extends StatelessWidget {
           children: [
             Column(
               children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage('assets/images/active_tick.png'))),
-                ),
+                active
+                    ? Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/images/active_tick.png'))))
+                    : const Text(''),
                 Container(
                   alignment: Alignment.center,
                   height: 50,
@@ -177,14 +215,14 @@ class _PlayerCircle extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(100)),
-                  child: const Text(
-                    'G',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    shortName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                const Text(
-                  '\$ 999',
-                  style: TextStyle(
+                Text(
+                  '\$ $money',
+                  style: const TextStyle(
                       color: Colors.red, backgroundColor: Colors.yellow),
                 )
               ],
@@ -193,26 +231,28 @@ class _PlayerCircle extends StatelessWidget {
                 left: -10,
                 child: Row(
                   children: [
-                    Transform.rotate(
-                      angle: -math.pi / 8,
-                      child: Container(
-                          width: 35,
-                          height: 55,
-                          decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/deck_of_cards/CLUB-1.png')))),
-                    ),
-                    Transform.rotate(
-                      angle: math.pi / 8,
-                      child: Container(
-                          width: 35,
-                          height: 55,
-                          decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/deck_of_cards/SPADE-11-JACK.png')))),
-                    )
+                    card1ImageUrl != ''
+                        ? Transform.rotate(
+                            angle: -math.pi / 8,
+                            child: Container(
+                                width: 35,
+                                height: 55,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(card1ImageUrl)))),
+                          )
+                        : const Text(''),
+                    card2ImageUrl != ''
+                        ? Transform.rotate(
+                            angle: math.pi / 8,
+                            child: Container(
+                                width: 35,
+                                height: 55,
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(card2ImageUrl)))),
+                          )
+                        : const Text('')
                   ],
                 )),
           ],

@@ -30,6 +30,12 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
     return RoomService.listRoom(0, 8);
   }
 
+  void _updateListRoomState() {
+    setState(() {
+      rooms = _fetchListRoom();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +67,16 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                     onPressed: () {},
                     icon: const Icon(
                       Icons.search,
+                      color: Colors.pinkAccent,
+                    ),
+                    iconSize: 30.0,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _updateListRoomState();
+                    },
+                    icon: const Icon(
+                      Icons.refresh,
                       color: Colors.pinkAccent,
                     ),
                     iconSize: 30.0,
@@ -146,6 +162,8 @@ class _RoomWidget extends StatelessWidget {
       ),
       onTap: () async {
         await AppLocalStorage.setItem("room_id", id);
+        final userID = AppLocalStorage.getItem('user_id');
+        await RoomService.joinRoom(roomID: id, userID: userID);
         Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
       },
     );
