@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/taiprogramer/simple-poker-game/backend/constants"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	"github.com/taiprogramer/simple-poker-game/backend/routes"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
@@ -50,7 +51,7 @@ func createAccount(body *UserAccountSignUpBody) (*UserSchemaResponse, bool) {
 	user := db.User{
 		Username:       body.Username,
 		HashedPassword: hashedPassword,
-		Money:          0,
+		Money:          constants.DEFAULT_MONEY_FOR_NEW_USER,
 	}
 	ok = db.DB.Create(&user).RowsAffected == 1
 	return &UserSchemaResponse{
