@@ -53,20 +53,31 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
 
   Widget _playerInSlot({int slot = -1}) {
     final index = slot - 1; // because slot count from 1
+    final userID = AppLocalStorage.getItem('user_id');
     // current sign in user
     if (slot == 0) {
-      return _PlayerCircle();
+      bool ready = false;
+      for (final user in room.users) {
+        if (user.id == userID) {
+          ready = user.ready;
+          break;
+        }
+      }
+      return _PlayerCircle(
+        ready: ready,
+      );
     }
     // slot is out of range
     if (slot > room.users.length) {
       return const Text("");
     }
     // skip current sign in user
-    if (room.users.elementAt(index).id == AppLocalStorage.getItem('user_id')) {
+    if (room.users.elementAt(index).id == userID) {
       return const Text("");
     }
 
-    return _PlayerCircle();
+    final ready = room.users.elementAt(index).ready;
+    return _PlayerCircle(ready: ready);
   }
 
   @override
@@ -200,6 +211,7 @@ class _PlayerCircle extends StatelessWidget {
   final String card1ImageUrl;
   final String card2ImageUrl;
   final bool active;
+  final bool ready;
 
   const _PlayerCircle(
       {Key? key,
@@ -207,7 +219,8 @@ class _PlayerCircle extends StatelessWidget {
       this.money = 0,
       this.card1ImageUrl = '',
       this.card2ImageUrl = '',
-      this.active = false})
+      this.active = false,
+      this.ready = false})
       : super(key: key);
 
   @override
@@ -232,7 +245,7 @@ class _PlayerCircle extends StatelessWidget {
                   height: 50,
                   width: 50,
                   decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: ready ? Colors.blue : Colors.grey,
                       borderRadius: BorderRadius.circular(100)),
                   child: Text(
                     shortName,
