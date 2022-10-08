@@ -70,108 +70,119 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Simple Poker Game'),
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  'Pot: ',
-                  style: TextStyle(fontSize: 24),
-                ),
-                Text(
-                  '0',
-                  style: TextStyle(fontSize: 24),
-                ),
-              ],
-            ),
+    return WillPopScope(
+        onWillPop: () async {
+          socketInstance.disconnect();
+          return true;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Simple Poker Game'),
           ),
-          SizedBox(
-            height: 350,
-            child: Container(
-              decoration: const BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('assets/images/poker_table.jpg'))),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _playerInSlot(slot: 3),
-                      Container(
-                        child: _playerInSlot(slot: 1),
-                        margin: const EdgeInsets.only(bottom: 40.0),
-                      ),
-                      Container(
-                        child: _playerInSlot(slot: 2),
-                        margin: const EdgeInsets.only(bottom: 40.0),
-                      ),
-                      _playerInSlot(slot: 4),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _playerInSlot(slot: 5),
-                      _playerInSlot(slot: 6),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _playerInSlot(slot: 7),
-                      Container(
-                        margin: const EdgeInsets.only(top: 40.0),
-                        child: _playerInSlot(slot: 0), // current sign in user
-                      ),
-                      _playerInSlot(slot: 8),
-                    ],
-                  )
-                ],
+          body: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      'Pot: ',
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    Text(
+                      '0',
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              SizedBox(
+                height: 350,
+                child: Container(
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage('assets/images/poker_table.jpg'))),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _playerInSlot(slot: 3),
+                          Container(
+                            child: _playerInSlot(slot: 1),
+                            margin: const EdgeInsets.only(bottom: 40.0),
+                          ),
+                          Container(
+                            child: _playerInSlot(slot: 2),
+                            margin: const EdgeInsets.only(bottom: 40.0),
+                          ),
+                          _playerInSlot(slot: 4),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _playerInSlot(slot: 5),
+                          _playerInSlot(slot: 6),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _playerInSlot(slot: 7),
+                          Container(
+                            margin: const EdgeInsets.only(top: 40.0),
+                            child:
+                                _playerInSlot(slot: 0), // current sign in user
+                          ),
+                          _playerInSlot(slot: 8),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(onPressed: () {}, child: const Text('Fold')),
+                    ElevatedButton(onPressed: () {}, child: const Text('Call')),
+                    ElevatedButton(
+                        onPressed: () {}, child: const Text('Raise')),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {}, child: const Text('Ready')),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {}, child: const Text('Start')),
+                    ElevatedButton(
+                        onPressed: () {}, child: const Text('Delete')),
+                    ElevatedButton(
+                        onPressed: () {}, child: const Text('Delegate')),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(onPressed: () {}, child: const Text('Fold')),
-                ElevatedButton(onPressed: () {}, child: const Text('Call')),
-                ElevatedButton(onPressed: () {}, child: const Text('Raise')),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(onPressed: () {}, child: const Text('Ready')),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(onPressed: () {}, child: const Text('Start')),
-                ElevatedButton(onPressed: () {}, child: const Text('Delete')),
-                ElevatedButton(onPressed: () {}, child: const Text('Delegate')),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }
 
