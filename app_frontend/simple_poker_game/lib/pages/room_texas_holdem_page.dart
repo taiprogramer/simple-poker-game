@@ -33,6 +33,14 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
         room = roomData;
       });
     }
+
+    if (msg == "room status was changed") {
+      final roomData =
+          await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
+      setState(() {
+        room = roomData;
+      });
+    }
   }
 
   void _connectWebSocket() {

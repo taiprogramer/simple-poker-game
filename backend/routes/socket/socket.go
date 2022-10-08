@@ -87,6 +87,15 @@ func getCardID(card string) uint {
 	return cardRepo.FindCardIDByNumberAndSuit(number, suit)
 }
 
+func broadcastMsgToRoom(msg string, roomID int) {
+	connections, ok := roomSocketConnections[roomID]
+	if ok {
+		for _, conn := range connections {
+			conn.c.WriteMessage(websocket.TextMessage, []byte(msg))
+		}
+	}
+}
+
 func SocketHandler(c *websocket.Conn) {
 	var (
 		mt  int
@@ -101,13 +110,8 @@ func SocketHandler(c *websocket.Conn) {
 	// get the room
 	room, _ := roomRepo.FindRoomByID(roomID)
 
-	connections, ok := roomSocketConnections[roomID]
-	if ok {
-		// notify for existing players when new user join room
-		for _, conn := range connections {
-			conn.c.WriteMessage(websocket.TextMessage, []byte("new user join room"))
-		}
-	}
+	// notify for existing players when new user join room
+	broadcastMsgToRoom("new user join room", roomID)
 
 	socketConn := SocketConnection{
 		c:      c,
@@ -155,6 +159,9 @@ func SocketHandler(c *websocket.Conn) {
 			break
 		}
 	}
+
+	// notify room status was changed when players leave room
+	broadcastMsgToRoom("room status was changed", roomID)
 
 	// remove socket connection
 	i := 0
