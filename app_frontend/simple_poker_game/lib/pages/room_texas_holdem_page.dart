@@ -15,31 +15,35 @@ class RoomTexasHoldemPage extends StatefulWidget {
 
 class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   Room room = Room();
+  bool ready = false;
+
+  final int userID = AppLocalStorage.getItem("user_id");
+  final int roomID = AppLocalStorage.getItem("room_id");
+
   late SocketInstance socketInstance;
 
-  Future<void> _fetchData() async {
+  Future<void> _refreshRoomState() async {
     final roomData =
         await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
+    late final bool readyStatus;
+    for (final user in roomData.users) {
+      if (user.id == userID) {
+        readyStatus = user.ready;
+      }
+    }
     setState(() {
       room = roomData;
+      ready = readyStatus;
     });
   }
 
   void _socketListener(String msg) async {
     if (msg == "new user join room") {
-      final roomData =
-          await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
-      setState(() {
-        room = roomData;
-      });
+      _refreshRoomState();
     }
 
     if (msg == "room status was changed") {
-      final roomData =
-          await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
-      setState(() {
-        room = roomData;
-      });
+      _refreshRoomState();
     }
   }
 
@@ -83,7 +87,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _refreshRoomState();
     _connectWebSocket();
   }
 
@@ -181,7 +185,12 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                        onPressed: () {}, child: const Text('Ready')),
+                        onPressed: () async {
+                          await RoomService.updateReadyStatus(
+                              roomID: room.id, ready: !ready, userID: userID);
+                          socketInstance.send("ready");
+                        },
+                        child: Text(ready ? 'Cancel' : 'Ready')),
                   ],
                 ),
               ),

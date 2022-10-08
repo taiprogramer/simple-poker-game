@@ -153,6 +153,9 @@ func SocketHandler(c *websocket.Conn) {
 				}
 			}
 		}
+		if strings.Compare(command, "ready") == 0 {
+			broadcastMsgToRoom("room status was changed", roomID)
+		}
 
 		if err = c.WriteMessage(mt, msg); err != nil {
 			log.Println("write:", err)
