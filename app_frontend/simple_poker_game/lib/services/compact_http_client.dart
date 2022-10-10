@@ -33,6 +33,8 @@ class CompactHttpClient {
       [String accessToken = '']) async {
     String url = endPoint + query;
     HttpClientRequest request = await _http.get(_host, _port, url);
+    request.headers.add(HttpHeaders.contentTypeHeader, 'application/json');
+    request.headers.add(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
     return await request.close();
   }
 }

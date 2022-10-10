@@ -481,9 +481,9 @@ func cardsToCardsResponse(cards []*db.Card) []CardSchemaResponse {
 }
 
 func userTableCardsToCards(value []db.UsersTablesCard) []*db.Card {
-	cards := make([]*db.Card, 0)
-	for _, v := range value {
-		cards = append(cards, &v.Card)
+	var cards []*db.Card
+	for i := 0; i < len(value); i++ {
+		cards = append(cards, &value[i].Card)
 	}
 	return cards
 }

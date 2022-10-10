@@ -1,6 +1,7 @@
 package socket
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"strconv"
@@ -96,6 +97,18 @@ func broadcastMsgToRoom(msg string, roomID int) {
 	}
 }
 
+func unicastMsgToUser(msg string, roomID int, userID int) {
+	connections, ok := roomSocketConnections[roomID]
+	if ok {
+		for _, conn := range connections {
+			if conn.userID == userID {
+				conn.c.WriteMessage(websocket.TextMessage, []byte(msg))
+				break
+			}
+		}
+	}
+}
+
 func SocketHandler(c *websocket.Conn) {
 	var (
 		mt  int
@@ -148,10 +161,14 @@ func SocketHandler(c *websocket.Conn) {
 					card2 := dealNextCard(roomID)
 					card1ID := getCardID(card1)
 					card2ID := getCardID(card2)
-					userTableCardRepo.AddNewCard(tableID, uint(userID), card1ID)
-					userTableCardRepo.AddNewCard(tableID, uint(userID), card2ID)
+					userTableCardRepo.AddNewCard(tableID, v.UserID, card1ID)
+					userTableCardRepo.AddNewCard(tableID, v.UserID, card2ID)
+					unicastMsgToUser("table="+fmt.Sprint(tableID), roomID, int(v.UserID))
 				}
 			}
+			room.Playing = true
+			roomRepo.UpdateRoom(room)
+			broadcastMsgToRoom("the game is started", roomID)
 		}
 		if strings.Compare(command, "ready") == 0 {
 			broadcastMsgToRoom("room status was changed", roomID)

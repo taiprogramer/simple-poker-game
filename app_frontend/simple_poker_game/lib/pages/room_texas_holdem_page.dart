@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:simple_poker_game/models/room.dart';
+import 'package:simple_poker_game/models/table.dart';
 import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 import 'package:simple_poker_game/services/room/room_service.dart';
 import 'package:simple_poker_game/services/socket/socket.dart';
 import 'dart:math' as math;
+
+import 'package:simple_poker_game/services/table/table_service.dart';
 
 class RoomTexasHoldemPage extends StatefulWidget {
   static const String routeName = '/roomTexasHoldem';
@@ -16,6 +19,8 @@ class RoomTexasHoldemPage extends StatefulWidget {
 class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   Room room = Room();
   bool ready = false;
+  int tableID = 0;
+  PokerTable table = PokerTable();
 
   final int userID = AppLocalStorage.getItem("user_id");
   final int roomID = AppLocalStorage.getItem("room_id");
@@ -37,12 +42,25 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     });
   }
 
+  Future<void> _refreshTableState(int tableID) async {
+    final tableData = await TableService.getTable(tableID, userID);
+    setState(() {
+      table = tableData;
+    });
+  }
+
   void _socketListener(String msg) async {
-    if (msg == "new user join room") {
+    if (msg == "new user join room" || msg == "room status was changed") {
       _refreshRoomState();
     }
 
-    if (msg == "room status was changed") {
+    if (msg.startsWith("table=")) {
+      final tableIDStr = msg.substring(msg.indexOf("=") + 1);
+      tableID = int.parse(tableIDStr);
+      _refreshTableState(tableID);
+    }
+
+    if (msg == "the game is started") {
       _refreshRoomState();
     }
   }
@@ -55,20 +73,39 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     socketInstance.listen(_socketListener);
   }
 
+  void _startTheGame() {
+    socketInstance.send("start");
+  }
+
+  String _buildImageUrl(int number, int suit) {
+    final List<String> suits = ['DIAMOND', 'HEART', 'CLUB', 'SPADE'];
+    return 'assets/images/deck_of_cards/${suits.elementAt(suit)}-$number.png';
+  }
+
   Widget _playerInSlot({int slot = -1}) {
     final index = slot - 1; // because slot count from 1
     final userID = AppLocalStorage.getItem('user_id');
+    String card1ImageUrl = '';
+    String card2ImageUrl = '';
     // current sign in user
     if (slot == 0) {
       bool ready = false;
       for (final user in room.users) {
         if (user.id == userID) {
           ready = user.ready;
+          if (room.playing) {
+            final card1 = table.ownCards[0];
+            final card2 = table.ownCards[1];
+            card1ImageUrl = _buildImageUrl(card1.number, card1.suit);
+            card2ImageUrl = _buildImageUrl(card2.number, card2.suit);
+          }
           break;
         }
       }
       return _PlayerCircle(
         ready: ready,
+        card1ImageUrl: card1ImageUrl,
+        card2ImageUrl: card2ImageUrl,
       );
     }
     // slot is out of range
@@ -81,7 +118,11 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     }
 
     final ready = room.users.elementAt(index).ready;
-    return _PlayerCircle(ready: ready);
+    return _PlayerCircle(
+      ready: ready,
+      card1ImageUrl: card1ImageUrl,
+      card2ImageUrl: card2ImageUrl,
+    );
   }
 
   @override
@@ -200,7 +241,10 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                        onPressed: () {}, child: const Text('Start')),
+                        onPressed: () {
+                          _startTheGame();
+                        },
+                        child: const Text('Start')),
                     ElevatedButton(
                         onPressed: () {}, child: const Text('Delete')),
                     ElevatedButton(
