@@ -97,6 +97,7 @@ type TableSchemaResponse struct {
 
 type RoomBody struct {
 	UserID   uint   `json:"user_id"`
+	Money    int    `json:"money"`
 	Password string `json:"password"`
 }
 
@@ -124,7 +125,7 @@ func getNextUniqueCode() string {
 	return code
 }
 
-func createNewRoom(userID uint, private bool, password string) (*RoomSchemaResponse, bool) {
+func createNewRoom(userID uint, private bool, password string, money int) (*RoomSchemaResponse, bool) {
 	code := getNextUniqueCode()
 	room := db.Room{
 		Code:     code,
@@ -141,7 +142,7 @@ func createNewRoom(userID uint, private bool, password string) (*RoomSchemaRespo
 	// add room owner to waiting list
 	waitingList := db.WaitingList{
 		UserID:         userID,
-		AvailableMoney: 0,
+		AvailableMoney: money,
 		Ready:          true,
 		RoomID:         room.ID,
 	}
@@ -187,7 +188,7 @@ func CreateNewRoomHandler(c *fiber.Ctx) error {
 	}
 
 	private := body.Password != ""
-	response, ok := createNewRoom(body.UserID, private, body.Password)
+	response, ok := createNewRoom(body.UserID, private, body.Password, body.Money)
 
 	if !ok {
 		e := routes.NewErrorResponse([]string{"Can not create new room."})

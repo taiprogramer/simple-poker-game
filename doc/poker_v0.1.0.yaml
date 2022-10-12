@@ -159,10 +159,16 @@ paths:
                     user_id:
                       description: Room owner.
                       type: integer
+                    money:
+                      description: Amount of money owner want to bring to the room.
+                      type: integer
                 - type: object
                   properties:
                     user_id:
                       description: Room owner.
+                      type: integer
+                    money:
+                      description: Amount of money owner want to bring to the room.
                       type: integer
                     password:
                       description: Room password if room is private in plain text.
