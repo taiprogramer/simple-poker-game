@@ -17,10 +17,11 @@ class RoomService {
     return rooms;
   }
 
-  static Future<Room> newRoom({int userID = 0, String password = ''}) async {
+  static Future<Room> newRoom(
+      {int userID = 0, String password = '', int money = 0}) async {
     String accessToken = AppLocalStorage.getItem('access_token');
     final res = await CompactHttpClient.post(
-        '{"user_id": $userID, "password": "$password"}',
+        '{"user_id": $userID, "password": "$password", "money": $money}',
         _roomEndPoint,
         accessToken);
     String stringData = await res.transform(utf8.decoder).join();

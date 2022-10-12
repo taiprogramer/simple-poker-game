@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
+import 'package:simple_poker_game/models/user.dart';
 import 'package:simple_poker_game/pages/room_texas_holdem_page.dart';
+import 'package:simple_poker_game/services/auth/auth_service.dart';
 import 'package:simple_poker_game/services/local_storage/local_storage.dart';
 
 import '../models/room.dart';
@@ -19,21 +22,81 @@ class TexasHoldemPage extends StatefulWidget {
 
 class _TexasHoldemPageState extends State<TexasHoldemPage> {
   late Future<List<Room>> rooms;
+  late User user;
 
   @override
   void initState() {
     super.initState();
     rooms = _fetchListRoom();
+    _updateUserState();
   }
 
   Future<List<Room>> _fetchListRoom() {
     return RoomService.listRoom(0, 8);
   }
 
+  void _updateUserState() async {
+    int userID = AppLocalStorage.getItem('user_id');
+    final userData = await AuthService.getUser(userID);
+    setState(() {
+      user = userData;
+    });
+  }
+
   void _updateListRoomState() {
     setState(() {
       rooms = _fetchListRoom();
     });
+  }
+
+  _onSliderChangedEndHandler(double value) async {
+    await AppLocalStorage.setItem('amount', value);
+  }
+
+  _newRoom() async {
+    try {
+      double amount = AppLocalStorage.getItem('amount');
+      int intAmount = amount.toInt();
+      if (intAmount == 0) {
+        return;
+      }
+      final room = await RoomService.newRoom(userID: user.id, money: intAmount);
+      await AppLocalStorage.setItem('room_id', room.id);
+      Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
+    } catch (_) {}
+  }
+
+  _showAskingMoneyDialog(BuildContext context) {
+    showPlatformDialog(
+      context: context,
+      builder: (context) => BasicDialogAlert(
+        title: const Text('How much money you want to bring to the room?'),
+        content: SizedBox(
+          height: 100,
+          child: _MySlider(
+            maxValue: user.money.toDouble(),
+            onChangedEndHandler: _onSliderChangedEndHandler,
+          ),
+        ),
+        actions: <Widget>[
+          BasicDialogAction(
+            title: const Text('Cancel'),
+            onPressed: () async {
+              await AppLocalStorage.setItem('amount', 0.0);
+              Navigator.pop(context);
+            },
+          ),
+          BasicDialogAction(
+            title: const Text('Go'),
+            onPressed: () async {
+              Navigator.pop(context);
+              _newRoom();
+              await AppLocalStorage.setItem('amount', 0.0);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -116,12 +179,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                         RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20)))),
                 onPressed: () async {
-                  int userID = AppLocalStorage.getItem("user_id");
-                  try {
-                    final room = await RoomService.newRoom(userID: userID);
-                    await AppLocalStorage.setItem("room_id", room.id);
-                    Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
-                  } catch (_) {}
+                  _showAskingMoneyDialog(context);
                 },
                 child: const Text('New room')),
           ]),
@@ -166,6 +224,36 @@ class _RoomWidget extends StatelessWidget {
         await RoomService.joinRoom(roomID: id, userID: userID);
         Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
       },
+    );
+  }
+}
+
+class _MySlider extends StatefulWidget {
+  const _MySlider({this.maxValue = 0, required this.onChangedEndHandler});
+
+  final double maxValue;
+  final void Function(double) onChangedEndHandler;
+
+  @override
+  State<_MySlider> createState() => _MySliderState();
+}
+
+class _MySliderState extends State<_MySlider> {
+  double _currentSliderValue = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Slider(
+      value: _currentSliderValue,
+      max: widget.maxValue,
+      divisions: 100,
+      label: _currentSliderValue.round().toString(),
+      onChanged: (double value) {
+        setState(() {
+          _currentSliderValue = value;
+        });
+      },
+      onChangeEnd: (double value) => {widget.onChangedEndHandler(value)},
     );
   }
 }

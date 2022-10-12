@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:simple_poker_game/services/local_storage/local_storage.dart';
+
 import '../../models/user.dart';
 import '../compact_http_client.dart';
 
@@ -55,5 +57,15 @@ class AuthService {
     Authentication authentication =
         Authentication(userID: userID, accessToken: accessToken);
     return authentication;
+  }
+
+  static Future<User> getUser(int userID) async {
+    String accessToken = AppLocalStorage.getItem('access_token');
+    final res =
+        await CompactHttpClient.get('/$userID', _userEndPoint, accessToken);
+    String stringData = await res.transform(utf8.decoder).join();
+    dynamic body = jsonDecode(stringData);
+    User user = User.fromMap(body);
+    return user;
   }
 }
