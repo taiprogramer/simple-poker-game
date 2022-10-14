@@ -31,11 +31,11 @@ func startNewGame(room *db.Room, userID int) {
 	*/
 	waitings := roomRepo.GetWaitingListsByRoomID(roomID)
 
+	tableID := tableRepo.CreateNewTable(uint(userID), room.ID, 1, 0, false)
 	room_card.ShuffleCards(roomID)
 	for _, v := range waitings {
 		// add players to tables.
 		if v.Ready {
-			tableID := tableRepo.CreateNewTable(v.UserID, room.ID, 0, 0, false)
 			// deal 2 cards for playing users.
 			card1 := room_card.DealNextCard(roomID)
 			card2 := room_card.DealNextCard(roomID)
