@@ -20,7 +20,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   Room room = Room();
   bool ready = false;
   int tableID = 0;
-  PokerTable table = PokerTable();
+  PokerTable table = PokerTable(currentTurn: UserTurn());
 
   final int userID = AppLocalStorage.getItem("user_id");
   final int roomID = AppLocalStorage.getItem("room_id");
@@ -42,9 +42,12 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     });
   }
 
-  Future<void> _refreshTableState(int tableID) async {
+  Future<void> _refreshTableAndRoomState(int tableID, int roomID) async {
+    final roomData = await RoomService.getRoom(roomID: roomID);
     final tableData = await TableService.getTable(tableID, userID);
+
     setState(() {
+      room = roomData;
       table = tableData;
     });
   }
@@ -57,11 +60,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     if (msg.startsWith("table=")) {
       final tableIDStr = msg.substring(msg.indexOf("=") + 1);
       tableID = int.parse(tableIDStr);
-      _refreshTableState(tableID);
-    }
-
-    if (msg == "the game is started") {
-      _refreshRoomState();
+      _refreshTableAndRoomState(tableID, AppLocalStorage.getItem('room_id'));
     }
   }
 
@@ -87,6 +86,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     final userID = AppLocalStorage.getItem('user_id');
     String card1ImageUrl = '';
     String card2ImageUrl = '';
+    bool active = false;
     // current sign in user
     if (slot == 0) {
       bool ready = false;
@@ -98,6 +98,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
             final card2 = table.ownCards[1];
             card1ImageUrl = _buildImageUrl(card1.number, card1.suit);
             card2ImageUrl = _buildImageUrl(card2.number, card2.suit);
+            active = table.currentTurn.userID == userID;
           }
           break;
         }
@@ -106,6 +107,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
         ready: ready,
         card1ImageUrl: card1ImageUrl,
         card2ImageUrl: card2ImageUrl,
+        active: active,
       );
     }
     // slot is out of range
@@ -118,10 +120,14 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     }
 
     final ready = room.users.elementAt(index).ready;
+    if (room.playing) {
+      active = table.currentTurn.userID == room.users[index].id;
+    }
     return _PlayerCircle(
       ready: ready,
       card1ImageUrl: card1ImageUrl,
       card2ImageUrl: card2ImageUrl,
+      active: active,
     );
   }
 
@@ -148,16 +154,32 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
               Container(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      'Pot: ',
-                      style: TextStyle(fontSize: 24),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Text(
+                          'Round: ',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        Text(
+                          table.round.toString(),
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '0',
-                      style: TextStyle(fontSize: 24),
-                    ),
+                    Row(
+                      children: [
+                        const Text(
+                          'Pot: ',
+                          style: TextStyle(fontSize: 24),
+                        ),
+                        Text(
+                          table.pot.toString(),
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),

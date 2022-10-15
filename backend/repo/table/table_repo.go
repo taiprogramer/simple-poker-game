@@ -17,8 +17,12 @@ func CreateNewTable(userID uint, roomID uint, round int, pot int, done bool) uin
 	return table.ID
 }
 
-func FindTableByUserIDAndRoomID(userID uint, roomID uint) db.Table {
+func UpdateTable(table *db.Table) {
+	db.DB.Save(table)
+}
+
+func FindTableByRoomID(roomID uint) db.Table {
 	var table db.Table
-	db.DB.Where("user_id = ? AND room_id = ?", userID, roomID).First(&table)
+	db.DB.Where("room_id = ?", roomID).First(&table)
 	return table
 }

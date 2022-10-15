@@ -18,6 +18,14 @@ import (
 // map userID to roomID
 var userInRooms map[int]int = make(map[int]int)
 
+type UserTurn struct {
+	UserID           int
+	HasPerformAction bool
+}
+
+// track current turn
+var tableUsersTurn map[int][]UserTurn = make(map[int][]UserTurn)
+
 func startNewGame(room *db.Room, userID int) {
 	roomID := int(room.ID)
 	// not the owner can not issue "start" command
@@ -43,10 +51,26 @@ func startNewGame(room *db.Room, userID int) {
 			card2ID := room_card.GetCardID(card2)
 			userTableCardRepo.AddNewCard(tableID, v.UserID, card1ID)
 			userTableCardRepo.AddNewCard(tableID, v.UserID, card2ID)
+			// track current turn
+			userTurn := UserTurn{
+				UserID:           int(v.UserID),
+				HasPerformAction: false,
+			}
+			tableUsersTurn[int(tableID)] = append(tableUsersTurn[int(tableID)], userTurn)
 			socket_mgmt.UnicastMsgToUser("table="+fmt.Sprint(tableID), roomID, int(v.UserID))
 		}
 	}
 	room.Playing = true
+	// big blind and small blind perform action
+	for i := 0; i < 2; i++ {
+		tableUsersTurn[int(tableID)][i].HasPerformAction = true
+	}
+	// next current is third user
+	table := tableRepo.FindTableByRoomID(room.ID)
+	table.Pot = 300
+	table.UserID = uint(tableUsersTurn[int(tableID)][2].UserID)
+	tableRepo.UpdateTable(&table)
+
 	roomRepo.UpdateRoom(room)
 	socket_mgmt.BroadcastMsgToRoom("the game is started", roomID)
 }

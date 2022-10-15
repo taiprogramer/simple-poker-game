@@ -87,7 +87,7 @@ type TableSchemaResponse struct {
 	CommonCards     []CardSchemaResponse          `json:"common_cards"`
 	OwnCards        []CardSchemaResponse          `json:"own_cards"`
 	BestCombination CombinationSchemaResponse     `json:"best_combination"`
-	CurrentTurn     TurnSchemaResponse            `json:"user_id"`
+	CurrentTurn     TurnSchemaResponse            `json:"current_turn"`
 	LatestBet       BetSchemaResponse             `json:"latest_bet"`
 	AvailableAction AvailableActionSchemaResponse `json:"available_action"`
 	Players         []PlayerSchemaResponse        `json:"players"`
