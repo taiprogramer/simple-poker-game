@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
+	"github.com/taiprogramer/simple-poker-game/backend/repo/bet_histories"
 	"github.com/taiprogramer/simple-poker-game/backend/routes"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
 	"gorm.io/gorm"
@@ -591,6 +592,43 @@ func GetTableHandler(c *fiber.Ctx) error {
 	}
 
 	response, err := getTableInfo(tableID, query.UserID)
+	if err != nil {
+		e := routes.NewErrorResponse(
+			[]string{err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+	return c.Status(fiber.StatusOK).JSON(response)
+}
+
+func writeBetHistory(tableID, userID int, actionName string, amount int) {
+	actionID := bet_histories.FindActionIDByName(actionName)
+	bet_histories.WriteBetHistory(tableID, userID, actionID, amount)
+}
+
+func PerformActionHandler(c *fiber.Ctx) error {
+	tableID, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		e := routes.NewErrorResponse([]string{"Please supply a table id!"})
+		return c.Status(fiber.StatusBadRequest).JSON(e)
+	}
+
+	type ActionData struct {
+		UserID int    `json:"user_id"`
+		Action string `json:"action"`
+		Amount int    `json:"amount"`
+	}
+
+	var actionData ActionData
+	c.BodyParser(&actionData)
+
+	writeBetHistory(tableID, actionData.UserID, actionData.Action, actionData.Amount)
+
+	// just return the old info of the table, delegate the job update table status
+	// to the socket logic (simplify the overall cost for now)
+	// it's better to have the logic update table status in here for data consistency,
+	// to do this, we need to re-design the database structure,
+	// it's risky to do at this stage, so simplify for now.
+	response, err := getTableInfo(tableID, uint(actionData.UserID))
 	if err != nil {
 		e := routes.NewErrorResponse(
 			[]string{err.Error()})

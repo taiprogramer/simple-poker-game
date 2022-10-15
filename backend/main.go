@@ -53,6 +53,7 @@ func main() {
 	app.Post("/room/:id", roomRouter.JoinRoomHandler)
 	app.Put("/room/:id", roomRouter.UpdateReadyStatusHandler)
 	app.Get("/table/:id", roomRouter.GetTableHandler)
+	app.Post("/table/:id", roomRouter.PerformActionHandler)
 
 	app.Listen(":3000")
 }
