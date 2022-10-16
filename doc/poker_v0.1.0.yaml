@@ -384,6 +384,9 @@ paths:
             schema:
               type: object
               properties:
+                user_id:
+                  description: The owner of the action.
+                  type: integer
                 action:
                   type: string
                   enum: [check, call, raise, fold]
