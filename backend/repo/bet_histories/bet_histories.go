@@ -17,3 +17,9 @@ func FindActionIDByName(name string) int {
 	db.DB.Where("name = ?", name).First(&action)
 	return int(action.ID)
 }
+
+func GetLatest(userID int) db.BetHistory {
+	var betHistory db.BetHistory
+	db.DB.Where("user_id = ?", userID).Last(&betHistory)
+	return betHistory
+}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
+	betHistoryRepo "github.com/taiprogramer/simple-poker-game/backend/repo/bet_histories"
 	roomRepo "github.com/taiprogramer/simple-poker-game/backend/repo/room"
 	tableRepo "github.com/taiprogramer/simple-poker-game/backend/repo/table"
 	userTableCardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/user_table_card"
@@ -63,7 +64,11 @@ func startNewGame(room *db.Room, userID int) {
 	room.Playing = true
 	// big blind and small blind perform action
 	for i := 0; i < 2; i++ {
-		tableUsersTurn[int(tableID)][i].HasPerformAction = true
+		userTurn := tableUsersTurn[int(tableID)][i]
+		userTurn.HasPerformAction = true
+		tableUsersTurn[int(tableID)][i] = userTurn
+		actionID := betHistoryRepo.FindActionIDByName("raise")
+		betHistoryRepo.WriteBetHistory(int(tableID), userTurn.UserID, actionID, 100*(i+1))
 	}
 	// next current is third user
 	table := tableRepo.FindTableByRoomID(room.ID)
@@ -73,6 +78,39 @@ func startNewGame(room *db.Room, userID int) {
 
 	roomRepo.UpdateRoom(room)
 	socket_mgmt.BroadcastMsgToRoom("the game is started", roomID)
+}
+
+func performActionPostHandler(userID, roomID int) {
+	isNextRound := true
+	table := tableRepo.FindTableByRoomID(uint(roomID))
+	usersTurns := tableUsersTurn[int(table.ID)]
+	betHistory := betHistoryRepo.GetLatest(userID)
+	table.Pot += betHistory.Amount
+
+	nextCurrentTurnIndex := 0
+	for i, v := range usersTurns {
+		if v.UserID == userID {
+			v.HasPerformAction = true
+			usersTurns[i] = v
+		}
+		if !v.HasPerformAction {
+			isNextRound = false
+			nextCurrentTurnIndex = i
+			break
+		}
+	}
+	// re-assign the current turn
+	table.UserID = uint(usersTurns[nextCurrentTurnIndex].UserID)
+
+	if isNextRound {
+		table.Round += 1
+		// reset users current turn
+		for i := 0; i < len(usersTurns); i++ {
+			usersTurns[i].HasPerformAction = false
+		}
+	}
+	tableRepo.UpdateTable(&table)
+	socket_mgmt.BroadcastMsgToRoom("table="+fmt.Sprint(table.ID), roomID)
 }
 
 func SocketHandler(c *websocket.Conn) {
@@ -105,6 +143,9 @@ func SocketHandler(c *websocket.Conn) {
 		}
 		if strings.Compare(command, "ready") == 0 {
 			socket_mgmt.BroadcastMsgToRoom("room status was changed", roomID)
+		}
+		if strings.Compare(command, "has performed action") == 0 {
+			performActionPostHandler(userID, roomID)
 		}
 
 		if err = c.WriteMessage(mt, msg); err != nil {
