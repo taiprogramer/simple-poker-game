@@ -76,13 +76,19 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     socketInstance.send("start");
   }
 
+  void _performAction(String actionName, int amount) async {
+    await TableService.performAction(table.id, userID, actionName, amount);
+    socketInstance.send('has performed action');
+  }
+
   String _buildImageUrl(int number, int suit) {
     final List<String> suits = ['DIAMOND', 'HEART', 'CLUB', 'SPADE'];
     return 'assets/images/deck_of_cards/${suits.elementAt(suit)}-$number.png';
   }
 
   Widget _playerInSlot({int slot = -1}) {
-    final index = slot - 1; // because slot count from 1
+    // because slot count from 1 except current sign-in user slot is 0.
+    final index = slot == 0 ? 0 : slot - 1;
     final userID = AppLocalStorage.getItem('user_id');
     String card1ImageUrl = '';
     String card2ImageUrl = '';
@@ -236,7 +242,11 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(onPressed: () {}, child: const Text('Fold')),
-                    ElevatedButton(onPressed: () {}, child: const Text('Call')),
+                    ElevatedButton(
+                        onPressed: () {
+                          _performAction('call', 0);
+                        },
+                        child: const Text('Call')),
                     ElevatedButton(
                         onPressed: () {}, child: const Text('Raise')),
                   ],
