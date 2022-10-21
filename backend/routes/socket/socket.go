@@ -22,6 +22,11 @@ var userInRooms map[int]int = make(map[int]int)
 type UserTurn struct {
 	UserID           int
 	HasPerformAction bool
+
+	// total amount money of the current round, the round is only finished if
+	// all users have the same amount and they've already performed their
+	// action.
+	Amount int
 }
 
 // track current turn
@@ -56,6 +61,7 @@ func startNewGame(room *db.Room, userID int) {
 			userTurn := UserTurn{
 				UserID:           int(v.UserID),
 				HasPerformAction: false,
+				Amount:           0,
 			}
 			tableUsersTurn[int(tableID)] = append(tableUsersTurn[int(tableID)], userTurn)
 			socket_mgmt.UnicastMsgToUser("table="+fmt.Sprint(tableID), roomID, int(v.UserID))
@@ -66,9 +72,10 @@ func startNewGame(room *db.Room, userID int) {
 	for i := 0; i < 2; i++ {
 		userTurn := tableUsersTurn[int(tableID)][i]
 		userTurn.HasPerformAction = true
+		userTurn.Amount = 100 * (i + 1)
 		tableUsersTurn[int(tableID)][i] = userTurn
 		actionID := betHistoryRepo.FindActionIDByName("raise")
-		betHistoryRepo.WriteBetHistory(int(tableID), userTurn.UserID, actionID, 100*(i+1))
+		betHistoryRepo.WriteBetHistory(int(tableID), userTurn.UserID, actionID, 100*(i+1), 1)
 	}
 	// next current is third user
 	table := tableRepo.FindTableByRoomID(room.ID)
@@ -86,13 +93,22 @@ func performActionPostHandler(userID, roomID int) {
 	usersTurns := tableUsersTurn[int(table.ID)]
 	betHistory := betHistoryRepo.GetLatest(userID)
 	table.Pot += betHistory.Amount
+	totalAmount := betHistoryRepo.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, userID)
 
-	nextCurrentTurnIndex := 0
 	for i, v := range usersTurns {
+		if v.Amount < totalAmount {
+			v.HasPerformAction = false
+		}
 		if v.UserID == userID {
 			v.HasPerformAction = true
-			usersTurns[i] = v
+			v.Amount = totalAmount
 		}
+		usersTurns[i] = v
+	}
+
+	// find next current turn
+	nextCurrentTurnIndex := 0
+	for i, v := range usersTurns {
 		if !v.HasPerformAction {
 			isNextRound = false
 			nextCurrentTurnIndex = i
@@ -107,6 +123,7 @@ func performActionPostHandler(userID, roomID int) {
 		// reset users current turn
 		for i := 0; i < len(usersTurns); i++ {
 			usersTurns[i].HasPerformAction = false
+			usersTurns[i].Amount = 0
 		}
 	}
 	tableRepo.UpdateTable(&table)

@@ -4,11 +4,13 @@ import (
 	"errors"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	"github.com/taiprogramer/simple-poker-game/backend/repo/bet_histories"
+	tableRepo "github.com/taiprogramer/simple-poker-game/backend/repo/table"
 	"github.com/taiprogramer/simple-poker-game/backend/routes"
 	"github.com/taiprogramer/simple-poker-game/backend/secure"
 	"gorm.io/gorm"
@@ -600,9 +602,25 @@ func GetTableHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response)
 }
 
-func writeBetHistory(tableID, userID int, actionName string, amount int) {
+func writeBetHistory(tableID, userID int, round int, actionName string, amount int) {
 	actionID := bet_histories.FindActionIDByName(actionName)
-	bet_histories.WriteBetHistory(tableID, userID, actionID, amount)
+	bet_histories.WriteBetHistory(tableID, userID, actionID, amount, round)
+}
+
+type ActionData struct {
+	UserID int    `json:"user_id"`
+	Action string `json:"action"`
+	Amount int    `json:"amount"`
+}
+
+func performAction(actionData ActionData, tableID int) {
+	table := tableRepo.GetTableByID(tableID)
+	if strings.Compare(actionData.Action, "call") == 0 {
+		betHistory := bet_histories.GetLatestByTableID(tableID)
+		totalAmountPreviousBet := bet_histories.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, int(betHistory.UserID))
+		totalAmount := bet_histories.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, actionData.UserID)
+		writeBetHistory(tableID, actionData.UserID, table.Round, actionData.Action, totalAmountPreviousBet-totalAmount)
+	}
 }
 
 func PerformActionHandler(c *fiber.Ctx) error {
@@ -612,16 +630,10 @@ func PerformActionHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(e)
 	}
 
-	type ActionData struct {
-		UserID int    `json:"user_id"`
-		Action string `json:"action"`
-		Amount int    `json:"amount"`
-	}
-
 	var actionData ActionData
 	c.BodyParser(&actionData)
 
-	writeBetHistory(tableID, actionData.UserID, actionData.Action, actionData.Amount)
+	performAction(actionData, tableID)
 
 	// just return the old info of the table, delegate the job update table status
 	// to the socket logic (simplify the overall cost for now)

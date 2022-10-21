@@ -102,6 +102,7 @@ type BetHistory struct {
 	ActionID uint
 	Action   Action `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Amount   int
+	Round    int
 }
 
 // store cards of user on specific table

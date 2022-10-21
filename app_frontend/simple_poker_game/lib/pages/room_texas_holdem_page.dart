@@ -244,6 +244,8 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                     ElevatedButton(onPressed: () {}, child: const Text('Fold')),
                     ElevatedButton(
                         onPressed: () {
+                          // zero have no meaning here because call action
+                          // doesn't need amount value.
                           _performAction('call', 0);
                         },
                         child: const Text('Call')),

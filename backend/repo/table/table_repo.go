@@ -26,3 +26,9 @@ func FindTableByRoomID(roomID uint) db.Table {
 	db.DB.Where("room_id = ?", roomID).First(&table)
 	return table
 }
+
+func GetTableByID(tableID int) db.Table {
+	var table db.Table
+	db.DB.Where("id = ?", tableID).First(&table)
+	return table
+}

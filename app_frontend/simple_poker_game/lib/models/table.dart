@@ -34,6 +34,31 @@ class UserTurn {
   }
 }
 
+class _Action {
+  final int id;
+  final String name;
+  final int amount;
+  _Action({this.id = 0, this.name = '', this.amount = 0});
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'amount': amount};
+
+  factory _Action.fromMap(Map data) {
+    return _Action(id: data['id'], name: data['name'], amount: data['amount']);
+  }
+}
+
+class _BetHistory {
+  final int userID;
+  _Action action = _Action();
+
+  _BetHistory({this.userID = 0, required this.action});
+
+  factory _BetHistory.fromMap(Map data) {
+    return _BetHistory(
+        userID: data['user_id'], action: _Action.fromMap(data['action']));
+  }
+}
+
 class PokerTable {
   final int id;
   final int round;
@@ -42,15 +67,17 @@ class PokerTable {
   final List<_Card> commonCards;
   final List<_Card> ownCards;
   final UserTurn currentTurn;
+  _BetHistory latestBet = _BetHistory(action: _Action());
 
-  PokerTable(
-      {this.id = 0,
-      this.round = 0,
-      this.done = false,
-      this.pot = 0,
-      this.commonCards = const [],
-      this.ownCards = const [],
-      required this.currentTurn});
+  PokerTable({
+    this.id = 0,
+    this.round = 0,
+    this.done = false,
+    this.pot = 0,
+    this.commonCards = const [],
+    this.ownCards = const [],
+    required this.currentTurn,
+  });
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -61,14 +88,17 @@ class PokerTable {
         'own_cards': ownCards
       };
   factory PokerTable.fromMap(Map data) {
-    return PokerTable(
-        id: data['id'],
-        round: data['round'],
-        done: data['done'],
-        pot: data['pot'],
-        commonCards: _convertListDynamicToCards(data['common_cards']),
-        ownCards: _convertListDynamicToCards(data['own_cards']),
-        currentTurn: UserTurn.fromMap(data['current_turn']));
+    final poker = PokerTable(
+      id: data['id'],
+      round: data['round'],
+      done: data['done'],
+      pot: data['pot'],
+      commonCards: _convertListDynamicToCards(data['common_cards']),
+      ownCards: _convertListDynamicToCards(data['own_cards']),
+      currentTurn: UserTurn.fromMap(data['current_turn']),
+    );
+    poker.latestBet = _BetHistory.fromMap(data['latest_bet']);
+    return poker;
   }
 
   static List<_Card> _convertListDynamicToCards(List<dynamic> cardsData) {
