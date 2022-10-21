@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
  Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.4" use-changelog="false" last-position="730,387" last-zoom="1" max-obj-count="22"
+<dbmodel pgmodeler-ver="1.0.0-beta" use-changelog="false" last-position="551,303" last-zoom="1" max-obj-count="22"
 	 default-schema="public" default-owner="postgres"
 	 layers="Default layer"
 	 active-layers="0"
@@ -29,7 +29,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</column>
 	<column name="hashed_password">
 		<type name="char" length="60"/>
-		<comment><![CDATA[bcrypt]]></comment>
+		<comment> <![CDATA[bcrypt]]> </comment>
 	</column>
 	<column name="money">
 		<type name="integer" length="0"/>
@@ -143,7 +143,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</column>
 	<column name="score">
 		<type name="integer" length="0"/>
-		<comment><![CDATA[Higher is better]]></comment>
+		<comment> <![CDATA[Higher is better]]> </comment>
 	</column>
 	<constraint name="combinations_pk" type="pk-constr" table="public.combinations">
 		<columns names="id" ref-type="src-columns"/>
@@ -183,8 +183,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="waiting_lists" layers="0" collapse-mode="2" max-obj-count="4" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Users in room
-]]></comment>
+	<comment> <![CDATA[Users in room
+]]> </comment>
 	<position x="480" y="180"/>
 	<column name="available_money">
 		<type name="integer" length="0"/>
@@ -264,7 +264,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</label>
 </relationship>
 
-<table name="bet_histories" layers="0" collapse-mode="2" max-obj-count="6" z-value="0">
+<table name="bet_histories" layers="0" collapse-mode="2" max-obj-count="7" z-value="0">
 	<schema name="public"/>
 	<role name="postgres"/>
 	<position x="740" y="540"/>
@@ -273,6 +273,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="integer" length="0"/>
 	</column>
 	<column name="amount">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="round">
 		<type name="integer" length="0"/>
 	</column>
 	<constraint name="bet_histories_pk" type="pk-constr" table="public.bet_histories">
