@@ -137,6 +137,25 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     );
   }
 
+  List<Widget> _generateCommonCardWidgets() {
+    List<Widget> commonCardWidgets = List.empty(growable: true);
+    for (int i = 0; i < table.commonCards.length; i++) {
+      final card = table.commonCards.elementAt(i);
+      final cardImageUrl = _buildImageUrl(card.number, card.suit);
+      commonCardWidgets.add(Container(
+        height: 80.0,
+        width: 30.0,
+        decoration: BoxDecoration(
+            image: DecorationImage(image: AssetImage(cardImageUrl))),
+      ));
+    }
+    return commonCardWidgets;
+  }
+
+  Widget _commonCards() {
+    return Row(children: _generateCommonCardWidgets());
+  }
+
   @override
   void initState() {
     super.initState();
@@ -217,6 +236,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           _playerInSlot(slot: 5),
+                          _commonCards(),
                           _playerInSlot(slot: 6),
                         ],
                       ),
