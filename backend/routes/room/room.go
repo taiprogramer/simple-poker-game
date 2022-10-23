@@ -619,7 +619,16 @@ func performAction(actionData ActionData, tableID int) {
 		betHistory := bet_histories.GetLatestByTableID(tableID)
 		totalAmountPreviousBet := bet_histories.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, int(betHistory.UserID))
 		totalAmount := bet_histories.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, actionData.UserID)
-		writeBetHistory(tableID, actionData.UserID, table.Round, actionData.Action, totalAmountPreviousBet-totalAmount)
+		writeBetHistory(tableID, actionData.UserID, table.Round,
+			actionData.Action, totalAmountPreviousBet-totalAmount)
+	}
+	if strings.Compare(actionData.Action, "raise") == 0 {
+		betHistory := bet_histories.GetLatestByTableID(tableID)
+		totalAmountPreviousBet := bet_histories.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, int(betHistory.UserID))
+		totalAmount := bet_histories.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, actionData.UserID)
+		writeBetHistory(tableID, actionData.UserID, table.Round,
+			actionData.Action, (totalAmountPreviousBet-totalAmount)+
+				actionData.Amount)
 	}
 }
 

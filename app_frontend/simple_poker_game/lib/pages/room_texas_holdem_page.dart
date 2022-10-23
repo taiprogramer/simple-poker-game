@@ -270,7 +270,10 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                         },
                         child: const Text('Call')),
                     ElevatedButton(
-                        onPressed: () {}, child: const Text('Raise')),
+                        onPressed: () {
+                          _performAction('raise', 100);
+                        },
+                        child: const Text('Raise')),
                   ],
                 ),
               ),
