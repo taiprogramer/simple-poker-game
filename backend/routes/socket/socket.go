@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"github.com/taiprogramer/simple-poker-game/backend/db"
 	betHistoryRepo "github.com/taiprogramer/simple-poker-game/backend/repo/bet_histories"
+	cardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/card"
 	roomRepo "github.com/taiprogramer/simple-poker-game/backend/repo/room"
 	tableRepo "github.com/taiprogramer/simple-poker-game/backend/repo/table"
 	userTableCardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/user_table_card"
@@ -87,6 +88,17 @@ func startNewGame(room *db.Room, userID int) {
 	socket_mgmt.BroadcastMsgToRoom("the game is started", roomID)
 }
 
+func generateCommonCards(roomID int, numCards int) []*db.Card {
+	var cards []*db.Card
+	for i := 0; i < numCards; i++ {
+		cardStr := room_card.DealNextCard(roomID)
+		cardNum, cardSuit := room_card.DecodeCard(cardStr)
+		card := cardRepo.FindCardByNumberAndSuit(cardNum, cardSuit)
+		cards = append(cards, &card)
+	}
+	return cards
+}
+
 func performActionPostHandler(userID, roomID int) {
 	isNextRound := true
 	table := tableRepo.FindTableByRoomID(uint(roomID))
@@ -124,6 +136,12 @@ func performActionPostHandler(userID, roomID int) {
 		for i := 0; i < len(usersTurns); i++ {
 			usersTurns[i].HasPerformAction = false
 			usersTurns[i].Amount = 0
+		}
+		if table.Round == 2 {
+			cards := generateCommonCards(roomID, 3)
+			for _, card := range cards {
+				table.Cards = append(table.Cards, card)
+			}
 		}
 	}
 	tableRepo.UpdateTable(&table)

@@ -3,6 +3,7 @@ package room_card
 import (
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	cardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/card"
@@ -24,6 +25,27 @@ var roomCards map[int][]string = make(map[int][]string)
 
 func randInt(min, max int) int {
 	return min + rand.Intn(max-min)
+}
+
+func DecodeCard(card string) (int, int) {
+	var cards []string = []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"}
+	var suits []string = []string{"0", "1", "2", "3"}
+
+	var number int
+	var suit int
+	for i, v := range cards {
+		if strings.Compare(string(card[0]), v) == 0 {
+			number = i + 1
+			break
+		}
+	}
+	for i, v := range suits {
+		if strings.Compare(string(card[1]), v) == 0 {
+			suit = i
+			break
+		}
+	}
+	return number, suit
 }
 
 func ShuffleCards(roomID int) {
