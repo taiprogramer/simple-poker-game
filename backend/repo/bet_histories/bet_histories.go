@@ -21,13 +21,17 @@ func FindActionIDByName(name string) int {
 
 func GetLatest(userID int) db.BetHistory {
 	var betHistory db.BetHistory
-	db.DB.Where("user_id = ?", userID).Last(&betHistory)
+	db.DB.Where("user_id = ?", userID).Preload("Action").Last(&betHistory)
 	return betHistory
 }
 
 func GetLatestByTableID(tableID int) db.BetHistory {
 	var betHistory db.BetHistory
-	db.DB.Where("table_id = ?", tableID).Last(&betHistory)
+	var action db.Action
+	db.DB.Where("name = ?", "fold").First(&action)
+
+	// skip fold action
+	db.DB.Where("table_id = ? AND action_id <> ?", tableID, action.ID).Last(&betHistory)
 	return betHistory
 }
 

@@ -28,6 +28,7 @@ type UserTurn struct {
 	// all users have the same amount and they've already performed their
 	// action.
 	Amount int
+	Fold   bool
 }
 
 // track current turn
@@ -63,6 +64,7 @@ func startNewGame(room *db.Room, userID int) {
 				UserID:           int(v.UserID),
 				HasPerformAction: false,
 				Amount:           0,
+				Fold:             false,
 			}
 			tableUsersTurn[int(tableID)] = append(tableUsersTurn[int(tableID)], userTurn)
 			socket_mgmt.UnicastMsgToUser("table="+fmt.Sprint(tableID), roomID, int(v.UserID))
@@ -114,6 +116,9 @@ func performActionPostHandler(userID, roomID int) {
 		if v.UserID == userID {
 			v.HasPerformAction = true
 			v.Amount = totalAmount
+			if strings.Compare(betHistory.Action.Name, "fold") == 0 {
+				v.Fold = true
+			}
 		}
 		usersTurns[i] = v
 	}
@@ -121,14 +126,15 @@ func performActionPostHandler(userID, roomID int) {
 	// find next current turn
 	nextCurrentTurnIndex := 0
 	for i, v := range usersTurns {
+		if v.Fold {
+			continue
+		}
 		if !v.HasPerformAction {
 			isNextRound = false
 			nextCurrentTurnIndex = i
 			break
 		}
 	}
-	// re-assign the current turn
-	table.UserID = uint(usersTurns[nextCurrentTurnIndex].UserID)
 
 	if isNextRound {
 		table.Round += 1
@@ -143,7 +149,16 @@ func performActionPostHandler(userID, roomID int) {
 				table.Cards = append(table.Cards, card)
 			}
 		}
+		// find new current turn in case of some users fold their card
+		for i, v := range usersTurns {
+			if !v.Fold {
+				nextCurrentTurnIndex = i
+				break
+			}
+		}
 	}
+	// re-assign the current turn
+	table.UserID = uint(usersTurns[nextCurrentTurnIndex].UserID)
 	tableRepo.UpdateTable(&table)
 	socket_mgmt.BroadcastMsgToRoom("table="+fmt.Sprint(table.ID), roomID)
 }

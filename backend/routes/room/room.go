@@ -627,6 +627,11 @@ func performAction(actionData ActionData, tableID int) {
 			actionData.Action, (totalAmountPreviousBet-totalAmount)+
 				actionData.Amount)
 	}
+	if strings.Compare(actionData.Action, "fold") == 0 {
+		// just mark action as fold with amount = 0
+		writeBetHistory(tableID, actionData.UserID, table.Round,
+			actionData.Action, 0)
+	}
 }
 
 func PerformActionHandler(c *fiber.Ctx) error {
