@@ -263,6 +263,11 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                   children: [
                     ElevatedButton(
                         onPressed: () {
+                          _performAction("check", 0);
+                        },
+                        child: const Text('Check')),
+                    ElevatedButton(
+                        onPressed: () {
                           _performAction("fold", 0);
                         },
                         child: const Text('Fold')),

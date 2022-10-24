@@ -632,6 +632,10 @@ func performAction(actionData ActionData, tableID int) {
 		writeBetHistory(tableID, actionData.UserID, table.Round,
 			actionData.Action, 0)
 	}
+	if strings.Compare(actionData.Action, "check") == 0 {
+		writeBetHistory(tableID, actionData.UserID, table.Round,
+			actionData.Action, 0)
+	}
 }
 
 func PerformActionHandler(c *fiber.Ctx) error {

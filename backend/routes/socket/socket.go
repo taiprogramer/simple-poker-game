@@ -149,6 +149,12 @@ func performActionPostHandler(userID, roomID int) {
 				table.Cards = append(table.Cards, card)
 			}
 		}
+		if table.Round > 2 && table.Round < 5 {
+			cards := generateCommonCards(roomID, 1)
+			for _, card := range cards {
+				table.Cards = append(table.Cards, card)
+			}
+		}
 		// find new current turn in case of some users fold their card
 		for i, v := range usersTurns {
 			if !v.Fold {
