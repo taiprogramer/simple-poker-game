@@ -96,8 +96,11 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     // current sign in user
     if (slot == 0) {
       bool ready = false;
+      String shortName = '';
       for (final user in room.users) {
         if (user.id == userID) {
+          shortName =
+              user.username.substring(user.username.length - 1).toUpperCase();
           ready = user.ready;
           if (room.playing) {
             final card1 = table.ownCards[0];
@@ -114,6 +117,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
         card1ImageUrl: card1ImageUrl,
         card2ImageUrl: card2ImageUrl,
         active: active,
+        shortName: shortName,
       );
     }
     // slot is out of range
@@ -126,6 +130,9 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     }
 
     final ready = room.users.elementAt(index).ready;
+    final user = room.users.elementAt(index);
+    final shortName =
+        user.username.substring(user.username.length - 1).toUpperCase();
     if (room.playing) {
       active = table.currentTurn.userID == room.users[index].id;
     }
@@ -134,6 +141,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
       card1ImageUrl: card1ImageUrl,
       card2ImageUrl: card2ImageUrl,
       active: active,
+      shortName: shortName,
     );
   }
 

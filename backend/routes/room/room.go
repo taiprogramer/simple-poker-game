@@ -17,8 +17,9 @@ import (
 )
 
 type UserInRoomSchema struct {
-	ID    uint `json:"id"`
-	Ready bool `json:"ready"`
+	ID       uint   `json:"id"`
+	Ready    bool   `json:"ready"`
+	Username string `json:"username"`
 }
 
 type RoomSchemaResponse struct {
@@ -152,6 +153,8 @@ func createNewRoom(userID uint, private bool, password string, money int) (*Room
 
 	db.DB.Create(&waitingList)
 
+	var user db.User
+	db.DB.Where("id = ?", userID).First(&user)
 	roomResponse := RoomSchemaResponse{
 		ID:      room.ID,
 		Code:    room.Code,
@@ -160,8 +163,9 @@ func createNewRoom(userID uint, private bool, password string, money int) (*Room
 		Owner:   room.UserID,
 		Users: []UserInRoomSchema{
 			{
-				ID:    waitingList.UserID,
-				Ready: waitingList.Ready,
+				ID:       waitingList.UserID,
+				Ready:    waitingList.Ready,
+				Username: user.Username,
 			},
 		},
 	}
@@ -216,9 +220,12 @@ func getRoomById(id int) (*RoomSchemaResponse, bool) {
 	var waitingLists []db.WaitingList
 	db.DB.Where("room_id", id).Find(&waitingLists)
 	for _, v := range waitingLists {
+		var user db.User
+		db.DB.Where("id = ?", v.UserID).First(&user)
 		usersInRoom = append(usersInRoom, UserInRoomSchema{
-			ID:    v.UserID,
-			Ready: v.Ready,
+			ID:       v.UserID,
+			Ready:    v.Ready,
+			Username: user.Username,
 		})
 	}
 
@@ -263,9 +270,12 @@ func getListRooms(offset int, limit int) ([]RoomSchemaResponse, bool) {
 		var waitingLists []db.WaitingList
 		db.DB.Where("room_id", room.ID).Find(&waitingLists)
 		for _, v := range waitingLists {
+			var user db.User
+			db.DB.Where("id = ?", v.UserID).First(&user)
 			usersInRoom = append(usersInRoom, UserInRoomSchema{
-				ID:    v.UserID,
-				Ready: v.Ready,
+				ID:       v.UserID,
+				Ready:    v.Ready,
+				Username: user.Username,
 			})
 		}
 		roomResponse := RoomSchemaResponse{

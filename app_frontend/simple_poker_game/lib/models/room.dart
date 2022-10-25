@@ -1,16 +1,16 @@
 class _User {
   final int id;
   final bool ready;
+  final String username;
 
-  _User({this.id = 0, this.ready = false});
+  _User({this.id = 0, this.ready = false, this.username = ''});
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'ready': ready,
-      };
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'ready': ready, 'username': username};
 
   factory _User.fromMap(Map data) {
-    return _User(id: data['id'], ready: data['ready']);
+    return _User(
+        id: data['id'], ready: data['ready'], username: data['username']);
   }
 }
 

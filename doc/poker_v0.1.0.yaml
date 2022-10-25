@@ -436,6 +436,8 @@ components:
             properties:
               id:
                 type: integer
+              username:
+                type: string
               ready:
                 type: boolean
         playing:
