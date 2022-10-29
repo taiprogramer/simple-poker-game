@@ -10,3 +10,9 @@ func AddNewCard(tableID, userID, cardID uint) {
 	}
 	db.DB.Create(&userCard)
 }
+
+func FindCards(tableID, userID int) []db.UsersTablesCard {
+	var cards []db.UsersTablesCard
+	db.DB.Preload("Card").Where("table_id = ? AND user_id = ?", tableID, userID).Find(&cards)
+	return cards
+}

@@ -12,6 +12,7 @@ import (
 	cardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/card"
 	roomRepo "github.com/taiprogramer/simple-poker-game/backend/repo/room"
 	tableRepo "github.com/taiprogramer/simple-poker-game/backend/repo/table"
+	"github.com/taiprogramer/simple-poker-game/backend/repo/user_table_card"
 	userTableCardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/user_table_card"
 	"github.com/taiprogramer/simple-poker-game/backend/routes/socket/room_card"
 	"github.com/taiprogramer/simple-poker-game/backend/routes/socket/socket_mgmt"
@@ -154,6 +155,42 @@ func performActionPostHandler(userID, roomID int) {
 			for _, card := range cards {
 				table.Cards = append(table.Cards, card)
 			}
+		}
+		// end game
+		if table.Round == 5 {
+			userCombination := make(map[int]room_card.Combination)
+			// get user combination
+			for _, u := range usersTurns {
+				cards := user_table_card.FindCards(int(table.ID), u.UserID)
+
+				strCards := make([]string, 0)
+				for _, card := range cards {
+					strCards = append(strCards,
+						room_card.EncodeCard(int(card.Card.Number),
+							int(card.Card.Suit)))
+				}
+				for _, card := range table.Cards {
+					strCards = append(strCards,
+						room_card.EncodeCard(int(card.Number),
+							int(card.Suit)))
+				}
+				combination := room_card.GetCombination(strCards)
+				userCombination[u.UserID] = combination
+			}
+
+			winers := room_card.FindWiners(userCombination)
+
+			// calculate shared money
+			sharedMoney := table.Pot / len(winers)
+
+			// update amount of money for winers
+			for uid := range winers {
+				roomRepo.IncreaseUserAmount(uid, roomID, sharedMoney)
+			}
+
+			socket_mgmt.BroadcastMsgToRoom("the game has ended",
+				roomID)
+			return
 		}
 		// find new current turn in case of some users fold their card
 		for i, v := range usersTurns {

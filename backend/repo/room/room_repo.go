@@ -39,3 +39,10 @@ func GetWaitingListsByRoomID(roomID int) []db.WaitingList {
 	db.DB.Where("room_id = ?", roomID).Find(&waitingLists)
 	return waitingLists
 }
+
+func IncreaseUserAmount(userID, roomID, amount int) {
+	var waitingList db.WaitingList
+	db.DB.Where("room_id = ? AND user_id = ?", roomID, userID).First(&waitingList)
+	waitingList.AvailableMoney = waitingList.AvailableMoney + amount
+	db.DB.Save(&waitingList)
+}
