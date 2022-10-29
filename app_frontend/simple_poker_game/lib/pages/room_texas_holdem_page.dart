@@ -19,6 +19,7 @@ class RoomTexasHoldemPage extends StatefulWidget {
 class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   Room room = Room();
   bool ready = false;
+  bool endGame = false;
   int tableID = 0;
   PokerTable table = PokerTable(currentTurn: UserTurn());
 
@@ -62,6 +63,11 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
       tableID = int.parse(tableIDStr);
       _refreshTableAndRoomState(tableID, AppLocalStorage.getItem('room_id'));
     }
+
+    if (msg == "the game has ended") {
+      endGame = true;
+      _refreshTableAndRoomState(tableID, AppLocalStorage.getItem('room_id'));
+    }
   }
 
   void _connectWebSocket() {
@@ -86,12 +92,16 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     return 'assets/images/deck_of_cards/${suits.elementAt(suit)}-$number.png';
   }
 
+  String _getBackCardImageUrl() {
+    return 'assets/images/back_card.png';
+  }
+
   Widget _playerInSlot({int slot = -1}) {
     // because slot count from 1 except current sign-in user slot is 0.
     final index = slot == 0 ? 0 : slot - 1;
     final userID = AppLocalStorage.getItem('user_id');
-    String card1ImageUrl = '';
-    String card2ImageUrl = '';
+    String card1ImageUrl = room.playing ? _getBackCardImageUrl() : '';
+    String card2ImageUrl = room.playing ? _getBackCardImageUrl() : '';
     bool active = false;
     // current sign in user
     if (slot == 0) {
@@ -136,6 +146,22 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     if (room.playing) {
       active = table.currentTurn.userID == room.users[index].id;
     }
+    if (endGame) {
+      // if the game is end, there is no active tick
+      active = false;
+      // show 2 cards of other players as well if the game is ended
+      for (int i = 0; i < table.results.length; i++) {
+        final result = table.results.elementAt(i);
+        if (result.userID == user.id) {
+          final card1 = result.cards.elementAt(0);
+          final card2 = result.cards.elementAt(1);
+          card1ImageUrl = _buildImageUrl(card1.number, card1.suit);
+          card2ImageUrl = _buildImageUrl(card2.number, card2.suit);
+          break;
+        }
+      }
+    }
+
     return _PlayerCircle(
       ready: ready,
       card1ImageUrl: card1ImageUrl,

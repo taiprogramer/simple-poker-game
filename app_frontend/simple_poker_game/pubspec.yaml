@@ -70,6 +70,7 @@ flutter:
     - assets/images/normal_room.png
     - assets/images/poker_table.jpg
     - assets/images/active_tick.png
+    - assets/images/back_card.png
     - assets/images/deck_of_cards/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

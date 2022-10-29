@@ -59,6 +59,26 @@ class _BetHistory {
   }
 }
 
+class _Result {
+  final int userID;
+  final List<_Card> cards;
+  _Result({this.userID = 0, this.cards = const []});
+
+  factory _Result.fromMap(Map data) {
+    return _Result(
+        userID: data['user_id'],
+        cards: _convertListDynamicToCards(data['cards']));
+  }
+
+  static List<_Card> _convertListDynamicToCards(List<dynamic> cardsData) {
+    List<_Card> cards = List.empty(growable: true);
+    for (final cardData in cardsData) {
+      cards.add(_Card.fromMap(cardData));
+    }
+    return cards;
+  }
+}
+
 class PokerTable {
   final int id;
   final int round;
@@ -68,6 +88,7 @@ class PokerTable {
   final List<_Card> ownCards;
   final UserTurn currentTurn;
   _BetHistory latestBet = _BetHistory(action: _Action());
+  final List<_Result> results;
 
   PokerTable({
     this.id = 0,
@@ -76,6 +97,7 @@ class PokerTable {
     this.pot = 0,
     this.commonCards = const [],
     this.ownCards = const [],
+    this.results = const [],
     required this.currentTurn,
   });
 
@@ -85,7 +107,8 @@ class PokerTable {
         'done': done,
         'pot': pot,
         'common_cards': commonCards,
-        'own_cards': ownCards
+        'own_cards': ownCards,
+        'results': results
       };
   factory PokerTable.fromMap(Map data) {
     final poker = PokerTable(
@@ -96,6 +119,7 @@ class PokerTable {
       commonCards: _convertListDynamicToCards(data['common_cards']),
       ownCards: _convertListDynamicToCards(data['own_cards']),
       currentTurn: UserTurn.fromMap(data['current_turn']),
+      results: _convertListDynamicToResults(data['results']),
     );
     poker.latestBet = _BetHistory.fromMap(data['latest_bet']);
     return poker;
@@ -107,5 +131,13 @@ class PokerTable {
       cards.add(_Card.fromMap(cardData));
     }
     return cards;
+  }
+
+  static List<_Result> _convertListDynamicToResults(List<dynamic> resultsData) {
+    List<_Result> results = List.empty(growable: true);
+    for (final result in resultsData) {
+      results.add(_Result.fromMap(result));
+    }
+    return results;
   }
 }
