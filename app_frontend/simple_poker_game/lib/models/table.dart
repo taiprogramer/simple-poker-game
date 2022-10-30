@@ -79,6 +79,17 @@ class _Result {
   }
 }
 
+class _Player {
+  final int id;
+  final int availableMoney;
+
+  _Player({this.id = 0, this.availableMoney = 0});
+
+  factory _Player.fromMap(Map data) {
+    return _Player(id: data['id'], availableMoney: data['available_money']);
+  }
+}
+
 class PokerTable {
   final int id;
   final int round;
@@ -89,6 +100,7 @@ class PokerTable {
   final UserTurn currentTurn;
   _BetHistory latestBet = _BetHistory(action: _Action());
   final List<_Result> results;
+  final List<_Player> players;
 
   PokerTable({
     this.id = 0,
@@ -98,6 +110,7 @@ class PokerTable {
     this.commonCards = const [],
     this.ownCards = const [],
     this.results = const [],
+    this.players = const [],
     required this.currentTurn,
   });
 
@@ -108,7 +121,8 @@ class PokerTable {
         'pot': pot,
         'common_cards': commonCards,
         'own_cards': ownCards,
-        'results': results
+        'results': results,
+        'players': players,
       };
   factory PokerTable.fromMap(Map data) {
     final poker = PokerTable(
@@ -120,6 +134,7 @@ class PokerTable {
       ownCards: _convertListDynamicToCards(data['own_cards']),
       currentTurn: UserTurn.fromMap(data['current_turn']),
       results: _convertListDynamicToResults(data['results']),
+      players: _convertListDynamicToPlayers(data['players']),
     );
     poker.latestBet = _BetHistory.fromMap(data['latest_bet']);
     return poker;
@@ -139,5 +154,13 @@ class PokerTable {
       results.add(_Result.fromMap(result));
     }
     return results;
+  }
+
+  static List<_Player> _convertListDynamicToPlayers(List<dynamic> data) {
+    List<_Player> players = List.empty(growable: true);
+    for (final player in data) {
+      players.add(_Player.fromMap(player));
+    }
+    return players;
   }
 }

@@ -96,12 +96,23 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     return 'assets/images/back_card.png';
   }
 
+  int _getAmount(PokerTable table, int userID) {
+    for (int i = 0; i < table.players.length; i++) {
+      final player = table.players.elementAt(i);
+      if (player.id == userID) {
+        return player.availableMoney;
+      }
+    }
+    return 0;
+  }
+
   Widget _playerInSlot({int slot = -1}) {
     // because slot count from 1 except current sign-in user slot is 0.
     final index = slot == 0 ? 0 : slot - 1;
     final userID = AppLocalStorage.getItem('user_id');
     String card1ImageUrl = room.playing ? _getBackCardImageUrl() : '';
     String card2ImageUrl = room.playing ? _getBackCardImageUrl() : '';
+    int amount = 0;
     bool active = false;
     // current sign in user
     if (slot == 0) {
@@ -118,6 +129,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
             card1ImageUrl = _buildImageUrl(card1.number, card1.suit);
             card2ImageUrl = _buildImageUrl(card2.number, card2.suit);
             active = table.currentTurn.userID == userID;
+            amount = _getAmount(table, userID);
           }
           break;
         }
@@ -128,6 +140,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
         card2ImageUrl: card2ImageUrl,
         active: active,
         shortName: shortName,
+        money: amount,
       );
     }
     // slot is out of range
@@ -145,6 +158,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
         user.username.substring(user.username.length - 1).toUpperCase();
     if (room.playing) {
       active = table.currentTurn.userID == room.users[index].id;
+      amount = _getAmount(table, user.id);
     }
     if (endGame) {
       // if the game is end, there is no active tick
@@ -168,6 +182,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
       card2ImageUrl: card2ImageUrl,
       active: active,
       shortName: shortName,
+      money: amount,
     );
   }
 
