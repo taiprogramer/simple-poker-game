@@ -67,7 +67,19 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
     } catch (_) {}
   }
 
-  _showAskingMoneyDialog(BuildContext context) {
+  _joinRoom() async {
+    double amount = AppLocalStorage.getItem('amount');
+    int intAmount = amount.toInt();
+    if (intAmount == 0) {
+      return;
+    }
+    final roomID = AppLocalStorage.getItem("room_id");
+    final userID = AppLocalStorage.getItem('user_id');
+    await RoomService.joinRoom(roomID: roomID, userID: userID);
+    Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
+  }
+
+  _showAskingMoneyDialog(BuildContext context, Function runWhenGo) {
     showPlatformDialog(
       context: context,
       builder: (context) => BasicDialogAlert(
@@ -91,13 +103,18 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
             title: const Text('Go'),
             onPressed: () async {
               Navigator.pop(context);
-              _newRoom();
+              runWhenGo();
               await AppLocalStorage.setItem('amount', 0.0);
             },
           ),
         ],
       ),
     );
+  }
+
+  _onTap(BuildContext context, int roomID) async {
+    await AppLocalStorage.setItem("room_id", roomID);
+    _showAskingMoneyDialog(context, _joinRoom);
   }
 
   @override
@@ -166,6 +183,9 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                             id: rooms[index].id,
                             private: rooms[index].private,
                             code: rooms[index].code,
+                            onTap: () {
+                              _onTap(context, rooms[index].id);
+                            },
                           );
                         });
                   } else if (snapshot.hasError) {
@@ -182,7 +202,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                         RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20)))),
                 onPressed: () async {
-                  _showAskingMoneyDialog(context);
+                  _showAskingMoneyDialog(context, _newRoom);
                 },
                 child: const Text('New room')),
           ]),
@@ -194,9 +214,14 @@ class _RoomWidget extends StatelessWidget {
   final int id;
   final String code;
   final bool private;
+  final void Function() onTap;
 
   const _RoomWidget(
-      {Key? key, this.id = 0, this.code = '', this.private = true})
+      {Key? key,
+      this.id = 0,
+      this.code = '',
+      this.private = true,
+      required this.onTap})
       : super(key: key);
 
   @override
@@ -221,12 +246,7 @@ class _RoomWidget extends StatelessWidget {
           )
         ],
       ),
-      onTap: () async {
-        await AppLocalStorage.setItem("room_id", id);
-        final userID = AppLocalStorage.getItem('user_id');
-        await RoomService.joinRoom(roomID: id, userID: userID);
-        Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
-      },
+      onTap: onTap,
     );
   }
 }
