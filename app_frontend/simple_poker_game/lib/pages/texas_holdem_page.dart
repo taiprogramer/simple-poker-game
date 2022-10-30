@@ -23,6 +23,7 @@ class TexasHoldemPage extends StatefulWidget {
 class _TexasHoldemPageState extends State<TexasHoldemPage> {
   late Future<List<Room>> rooms;
   late User user;
+  String roomFilter = '';
 
   @override
   void initState() {
@@ -123,17 +124,13 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                 children: [
                   Expanded(
                       child: TextFormField(
-                    decoration:
-                        const InputDecoration(labelText: 'Search by code'),
-                  )),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.search,
-                      color: Colors.pinkAccent,
-                    ),
-                    iconSize: 30.0,
-                  ),
+                          decoration: const InputDecoration(
+                              labelText: 'Search by code'),
+                          onChanged: (value) {
+                            setState(() {
+                              roomFilter = value;
+                            });
+                          })),
                   IconButton(
                     onPressed: () {
                       _updateListRoomState();
@@ -153,16 +150,22 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
                 future: rooms,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
+                    final rooms = snapshot.data!
+                        .where((room) => room.code
+                            .toLowerCase()
+                            .contains(roomFilter.toLowerCase()))
+                        .toList();
+
                     return GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 4, mainAxisExtent: 130),
-                        itemCount: snapshot.data!.length,
+                        itemCount: rooms.length,
                         itemBuilder: (BuildContext ctx, index) {
                           return _RoomWidget(
-                            id: snapshot.data![index].id,
-                            private: snapshot.data![index].private,
-                            code: snapshot.data![index].code,
+                            id: rooms[index].id,
+                            private: rooms[index].private,
+                            code: rooms[index].code,
                           );
                         });
                   } else if (snapshot.hasError) {
