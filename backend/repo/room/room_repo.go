@@ -46,3 +46,10 @@ func IncreaseUserAmount(userID, roomID, amount int) {
 	waitingList.AvailableMoney = waitingList.AvailableMoney + amount
 	db.DB.Save(&waitingList)
 }
+
+func DecreaseUserAmount(userID, roomID, amount int) {
+	var waitingList db.WaitingList
+	db.DB.Where("room_id = ? AND user_id = ?", roomID, userID).First(&waitingList)
+	waitingList.AvailableMoney = waitingList.AvailableMoney - amount
+	db.DB.Save(&waitingList)
+}

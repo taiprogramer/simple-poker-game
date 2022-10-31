@@ -79,6 +79,8 @@ func startNewGame(room *db.Room, userID int) {
 		userTurn.Amount = 100 * (i + 1)
 		tableUsersTurn[int(tableID)][i] = userTurn
 		actionID := betHistoryRepo.FindActionIDByName("raise")
+		// update user amount
+		roomRepo.DecreaseUserAmount(userTurn.UserID, roomID, 100*(i+1))
 		betHistoryRepo.WriteBetHistory(int(tableID), userTurn.UserID, actionID, 100*(i+1), 1)
 	}
 	// next current is third user
@@ -109,6 +111,8 @@ func performActionPostHandler(userID, roomID int) {
 	betHistory := betHistoryRepo.GetLatest(userID)
 	table.Pot += betHistory.Amount
 	totalAmount := betHistoryRepo.GetTotalAmountByRoundAndUserID(int(table.ID), table.Round, userID)
+	// update user amount
+	roomRepo.DecreaseUserAmount(userID, roomID, betHistory.Amount)
 
 	for i, v := range usersTurns {
 		if v.Amount < totalAmount {
