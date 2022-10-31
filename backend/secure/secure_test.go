@@ -10,6 +10,12 @@ import (
 const expectedButActual = "Expected: %v but Actual %v"
 const incorrectPass = "incorrect_pass"
 
+func CheckExpect(expect, actual interface{}, t *testing.T) {
+	if expect != actual {
+		t.Fatalf(expectedButActual, expect, actual)
+	}
+}
+
 // bcrypt hash of "pass"
 const h = "$2y$12$Tf9QJXpknE8JiC70dQBYM.83aHMG/QCJhfbKxwcc23/Arv9TSe/om"
 const plain = "pass"
@@ -21,38 +27,26 @@ const claimUser = "trump"
 func TestHashPassword(t *testing.T) {
 	h, _ := HashPassword(plain)
 	l := len(h)
-	if l != 60 {
-		t.Fatalf(expectedButActual, 60, l)
-	}
+	CheckExpect(60, l, t)
 }
 
 func TestComparePassword(t *testing.T) {
-	if !ComparePassword(plain, h) {
-		t.Fatalf(expectedButActual, true, false)
-	}
-	if ComparePassword(incorrectPass, h) {
-		t.Fatalf(expectedButActual, false, true)
-	}
+	CheckExpect(true, ComparePassword(plain, h), t)
+	CheckExpect(false, ComparePassword(incorrectPass, h), t)
 }
 
 func TestGenerateToken(t *testing.T) {
 	tokenString, ok := GenerateToken("simple")
-	if !ok {
-		t.Fatalf(expectedButActual, true, ok)
-	}
+	CheckExpect(true, ok, t)
 
 	// jwt format must have 2 dots: xxxxxxxx.xxxxxxxx.xxxxxxxx
 	// Header, Payload, Signature
 	dots := strings.Count(tokenString, ".")
-	if dots != 2 {
-		t.Fatalf(expectedButActual, 2, dots)
-	}
+	CheckExpect(2, dots, t)
 }
 
 func TestGetJWTClaim(t *testing.T) {
 	token, _ := jwt.Parse(tokenString, nil)
 	usr := GetJWTClaim("usr", token)
-	if usr != claimUser {
-		t.Fatalf(expectedButActual, claimUser, usr)
-	}
+	CheckExpect(claimUser, usr, t)
 }
