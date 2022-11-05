@@ -6,8 +6,8 @@ import 'config.dart';
 
 class CompactHttpClient {
   static final HttpClient _http = HttpClient();
-  static final String _host = ServiceConfig.getHost();
-  static final int _port = ServiceConfig.getPort();
+  static final String _host = ServiceConfig.getInstance().getHost();
+  static final int _port = ServiceConfig.getInstance().getPort();
 
   static Future<HttpClientResponse> post(String body, String endPoint,
       [String accessToken = '']) async {

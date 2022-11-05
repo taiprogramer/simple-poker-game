@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_poker_game/pages/room_texas_holdem_page.dart';
 import 'package:simple_poker_game/pages/texas_holdem_page.dart';
+import 'package:simple_poker_game/services/config.dart';
 
+import 'pages/setting_page.dart';
 import 'pages/home_page.dart';
 import 'pages/sign_in_page.dart';
 import 'pages/sign_up_page.dart';
 
 Future main() async {
   await dotenv.load(fileName: '.env');
+  await init();
   runApp(const MyApp());
+}
+
+Future init() async {
+  // get host config
+  // search precedence: shared preferences -> .env -> dummy value
+  final serviceConfig = ServiceConfig.getInstance();
+  final prefs = await SharedPreferences.getInstance();
+  var host =
+      prefs.getString('host') ?? dotenv.env['API_SERVER_HOST'] ?? '10.10.10.10';
+  var port = prefs.getInt('port') ??
+      int.parse(dotenv.env['API_SERVER_PORT'] ?? '1975');
+  serviceConfig.setHost(host);
+  serviceConfig.setPort(port);
 }
 
 class MyApp extends StatelessWidget {
@@ -24,6 +41,7 @@ class MyApp extends StatelessWidget {
           const TexasHoldemPage(),
       RoomTexasHoldemPage.routeName: (BuildContext context) =>
           const RoomTexasHoldemPage(),
+      SettingPage.routeName: (BuildContext context) => const SettingPage(),
     };
     return MaterialApp(
       title: 'Simple Poker Game',

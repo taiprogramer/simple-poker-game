@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_poker_game/pages/setting_page.dart';
 
 import 'sign_in_page.dart';
 import 'sign_up_page.dart';
@@ -9,7 +10,15 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Simple Poker Game')),
+        appBar:
+            AppBar(title: const Text('Simple Poker Game'), actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, SettingPage.routeName);
+            },
+            icon: const Icon(Icons.settings, color: Colors.white),
+          )
+        ]),
         body: Center(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

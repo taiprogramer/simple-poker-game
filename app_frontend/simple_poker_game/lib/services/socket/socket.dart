@@ -9,8 +9,9 @@ class SocketInstance {
   SocketInstance({this.userID = 0, this.roomID = 0});
 
   void connect() {
+    final serviceConfig = ServiceConfig.getInstance();
     socketChannel = WebSocketChannel.connect(Uri.parse(
-        'ws://${ServiceConfig.getHost()}:${ServiceConfig.getPort()}/ws/$userID?room=$roomID'));
+        'ws://${serviceConfig.getHost()}:${serviceConfig.getPort()}/ws/$userID?room=$roomID'));
   }
 
   void send(String msg) {

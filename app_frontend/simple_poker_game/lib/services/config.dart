@@ -1,11 +1,25 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 class ServiceConfig {
-  static String getHost() {
-    return dotenv.env['API_SERVER_HOST'] ?? '192.168.1.10';
+  late String host;
+  late int port;
+  static final ServiceConfig _singleton = ServiceConfig();
+
+  static ServiceConfig getInstance() {
+    return _singleton;
   }
 
-  static int getPort() {
-    return int.parse(dotenv.env['API_SERVER_PORT'] ?? '3000');
+  void setHost(String host) {
+    this.host = host;
+  }
+
+  void setPort(int port) {
+    this.port = port;
+  }
+
+  String getHost() {
+    return host;
+  }
+
+  int getPort() {
+    return port;
   }
 }
