@@ -15,6 +15,8 @@ Future main() async {
   await dotenv.load(fileName: '.env');
   await init();
   WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft])
       .then((_) {
     runApp(const MyApp());
