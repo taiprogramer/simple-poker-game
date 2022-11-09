@@ -120,93 +120,82 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
         body: SingleChildScrollView(
             child: Container(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(children: [
-            const Center(
-                child: Text(
-              'Texas Hold\'em',
-              style: TextStyle(
-                  fontSize: 36.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.pink),
-            )),
-            Container(
-              margin: const EdgeInsets.only(top: 20.0, bottom: 20.0),
-              child: Row(
-                children: [
-                  Expanded(
-                      child: TextFormField(
-                          decoration: const InputDecoration(
-                              labelText: 'Search by code'),
-                          onChanged: (value) {
-                            setState(() {
-                              roomFilter = value;
-                            });
-                          })),
-                  IconButton(
-                    onPressed: () {
-                      _updateListRoomState();
-                    },
-                    icon: const Icon(
-                      Icons.refresh,
-                      color: Colors.pinkAccent,
-                    ),
-                    iconSize: 30.0,
-                  )
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 250,
-              child: FutureBuilder<List<Room>>(
-                future: rooms,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    final rooms = snapshot.data!
-                        .where((room) => room.code
-                            .toLowerCase()
-                            .contains(roomFilter.toLowerCase()))
-                        .toList();
-
-                    return GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4, mainAxisExtent: 130),
-                        itemCount: rooms.length,
-                        itemBuilder: (BuildContext ctx, index) {
-                          return _RoomWidget(
-                            id: rooms[index].id,
-                            private: rooms[index].private,
-                            code: rooms[index].code,
-                            onTap: () {
-                              _onTap(context, rooms[index].id);
-                            },
-                          );
+      padding: const EdgeInsets.all(20.0),
+      child: Column(children: [
+        Container(
+          margin: const EdgeInsets.only(top: 20.0, bottom: 20.0),
+          child: Row(
+            children: [
+              Expanded(
+                  child: TextFormField(
+                      decoration:
+                          const InputDecoration(labelText: 'Search by code'),
+                      onChanged: (value) {
+                        setState(() {
+                          roomFilter = value;
                         });
-                  } else if (snapshot.hasError) {
-                    return const Text(
-                        'Can not connect to the server. Check your internet connection!');
-                  }
-                  return const CircularProgressIndicator();
+                      })),
+              IconButton(
+                onPressed: () {
+                  _updateListRoomState();
                 },
-              ),
-            ),
-            ElevatedButton(
-                style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)))),
-                onPressed: () async {
-                  _showAskingMoneyDialog(context, _newRoom);
-                },
-                child: const Text('New room')),
-          ]),
-        )));
+                icon: const Icon(
+                  Icons.refresh,
+                  color: Colors.pinkAccent,
+                ),
+                iconSize: 30.0,
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 180,
+          child: FutureBuilder<List<Room>>(
+            future: rooms,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final rooms = snapshot.data!
+                    .where((room) => room.code
+                        .toLowerCase()
+                        .contains(roomFilter.toLowerCase()))
+                    .toList();
+
+                return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 8, mainAxisExtent: 130),
+                    itemCount: rooms.length,
+                    itemBuilder: (BuildContext ctx, index) {
+                      return _RoomWidget(
+                        id: rooms[index].id,
+                        private: rooms[index].private,
+                        code: rooms[index].code,
+                        onTap: () {
+                          _onTap(context, rooms[index].id);
+                        },
+                      );
+                    });
+              } else if (snapshot.hasError) {
+                return const Text(
+                    'Can not connect to the server. Check your internet connection!');
+              }
+              return const CircularProgressIndicator();
+            },
+          ),
+        ),
+        ElevatedButton(
+            style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)))),
+            onPressed: () async {
+              _showAskingMoneyDialog(context, _newRoom);
+            },
+            child: const Text('New room')),
+      ]),
+    )));
   }
 }
 

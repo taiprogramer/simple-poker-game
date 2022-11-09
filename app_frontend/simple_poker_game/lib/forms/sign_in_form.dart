@@ -37,13 +37,6 @@ class SignInFormState extends State<SignInForm> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Sign in',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 36.0,
-                      color: Colors.pink),
-                ),
                 Container(
                     margin: const EdgeInsets.only(top: 10.0),
                     child: TextFormField(

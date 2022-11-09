@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_poker_game/pages/room_texas_holdem_page.dart';
@@ -13,7 +14,11 @@ import 'pages/sign_up_page.dart';
 Future main() async {
   await dotenv.load(fileName: '.env');
   await init();
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft])
+      .then((_) {
+    runApp(const MyApp());
+  });
 }
 
 Future init() async {
