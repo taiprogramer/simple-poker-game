@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:simple_poker_game/models/room.dart';
 import 'package:simple_poker_game/models/table.dart';
 import 'package:simple_poker_game/services/local_storage/local_storage.dart';
@@ -7,6 +10,29 @@ import 'package:simple_poker_game/services/socket/socket.dart';
 import 'dart:math' as math;
 
 import 'package:simple_poker_game/services/table/table_service.dart';
+
+class Chat {
+  final int userID;
+  final String content;
+  final bool seen;
+
+  Chat({
+    this.userID = 0,
+    this.content = '',
+    this.seen = false,
+  });
+
+  Map<String, dynamic> toJson() =>
+      {'user_id': userID, 'content': content, 'seen': seen};
+
+  factory Chat.fromMap(Map data) {
+    return Chat(
+      userID: data['user_id'],
+      content: data['content'],
+      seen: data['seen'],
+    );
+  }
+}
 
 class RoomTexasHoldemPage extends StatefulWidget {
   static const String routeName = '/roomTexasHoldem';
@@ -22,6 +48,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   bool endGame = false;
   int tableID = 0;
   PokerTable table = PokerTable(currentTurn: UserTurn());
+  List<Chat> chatMessages = List.empty(growable: true);
 
   final int userID = AppLocalStorage.getItem("user_id");
   final int roomID = AppLocalStorage.getItem("room_id");
@@ -68,6 +95,23 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
       endGame = true;
       _refreshTableAndRoomState(tableID, AppLocalStorage.getItem('room_id'));
     }
+
+    if (msg.startsWith("broadcast=")) {
+      final msgPattern = msg.split("=").elementAt(1);
+      final userID = msgPattern.split("\$").elementAt(0);
+      final content = msgPattern.split("\$").elementAt(1);
+      setState(() {
+        chatMessages.add(
+            Chat(userID: int.parse(userID), content: content, seen: false));
+      });
+      Timer timer = Timer(const Duration(seconds: 3), () {
+        setState(() {
+          chatMessages.removeAt(chatMessages.length - 1);
+          chatMessages.add(
+              Chat(userID: int.parse(userID), content: content, seen: true));
+        });
+      });
+    }
   }
 
   void _connectWebSocket() {
@@ -106,6 +150,22 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     return 0;
   }
 
+  String _getLatestChatUnseen(int userID) {
+    String msg = '';
+
+    for (var i = chatMessages.length - 1; i >= 0; i--) {
+      Chat chat = chatMessages.elementAt(i);
+      if (chat.userID == userID) {
+        if (!chat.seen) {
+          msg = chat.content;
+        }
+        break;
+      }
+    }
+
+    return msg;
+  }
+
   Widget _playerInSlot({int slot = -1}) {
     // because slot count from 1 except current sign-in user slot is 0.
     final index = slot == 0 ? 0 : slot - 1;
@@ -114,12 +174,14 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     String card2ImageUrl = room.playing ? _getBackCardImageUrl() : '';
     int amount = 0;
     bool active = false;
+    String msg = '';
     // current sign in user
     if (slot == 0) {
       bool ready = false;
       String shortName = '';
       for (final user in room.users) {
         if (user.id == userID) {
+          msg = _getLatestChatUnseen(userID);
           shortName =
               user.username.substring(user.username.length - 1).toUpperCase();
           ready = user.ready;
@@ -141,6 +203,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
         active: active,
         shortName: shortName,
         money: amount,
+        msg: msg,
       );
     }
     // slot is out of range
@@ -160,6 +223,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
       active = table.currentTurn.userID == room.users[index].id;
       amount = _getAmount(table, user.id);
     }
+    msg = _getLatestChatUnseen(user.id);
     if (endGame) {
       // if the game is end, there is no active tick
       active = false;
@@ -183,6 +247,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
       active: active,
       shortName: shortName,
       money: amount,
+      msg: msg,
     );
   }
 
@@ -305,6 +370,46 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
                   ),
                 ),
                 Positioned(
+                    right: 5.0,
+                    top: 5.0,
+                    child: IconButton(
+                      onPressed: () {
+                        showPlatformDialog(
+                            context: context,
+                            builder: (context) {
+                              var msg = '';
+                              return BasicDialogAlert(
+                                content: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 300.0,
+                                      child: TextFormField(
+                                          onChanged: (String? value) {
+                                            msg = value ?? '';
+                                          },
+                                          decoration: const InputDecoration(
+                                              labelText: 'Message',
+                                              icon: Icon(
+                                                Icons.mail_outline,
+                                                color: Colors.pinkAccent,
+                                              ))),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.send,
+                                          color: Colors.pink),
+                                      onPressed: () {
+                                        socketInstance.send('broadcast=$msg');
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              );
+                            });
+                      },
+                      icon: const Icon(Icons.message, color: Colors.pink),
+                    )),
+                Positioned(
                   bottom: 5.0,
                   right: 10.0,
                   child: Row(children: [
@@ -373,6 +478,7 @@ class _PlayerCircle extends StatelessWidget {
   final String card2ImageUrl;
   final bool active;
   final bool ready;
+  final String msg;
 
   const _PlayerCircle(
       {Key? key,
@@ -381,13 +487,14 @@ class _PlayerCircle extends StatelessWidget {
       this.card1ImageUrl = '',
       this.card2ImageUrl = '',
       this.active = false,
-      this.ready = false})
+      this.ready = false,
+      this.msg = ''})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-        width: 55,
+        width: 100.0,
         child: Stack(
           children: [
             Column(
@@ -448,6 +555,12 @@ class _PlayerCircle extends StatelessWidget {
                         : const Text('')
                   ],
                 )),
+            Positioned(
+                child: Text(msg,
+                    style: const TextStyle(
+                        fontSize: 16.0,
+                        backgroundColor: Colors.pinkAccent,
+                        color: Colors.white))),
           ],
         ));
   }

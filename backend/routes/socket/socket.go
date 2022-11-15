@@ -245,7 +245,13 @@ func SocketHandler(c *websocket.Conn) {
 			performActionPostHandler(userID, roomID)
 		}
 
-		if err = c.WriteMessage(mt, msg); err != nil {
+		if strings.Contains(command, "broadcast=") {
+			content := strings.Split(command, "=")[1]
+			socket_mgmt.BroadcastMsgToRoom("broadcast="+
+				fmt.Sprint(userID)+"$"+content, roomID)
+		}
+
+		if err = c.WriteMessage(mt, []byte("keep connection")); err != nil {
 			log.Println("write:", err)
 			break
 		}
