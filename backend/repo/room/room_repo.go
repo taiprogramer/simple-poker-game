@@ -53,3 +53,16 @@ func DecreaseUserAmount(userID, roomID, amount int) {
 	waitingList.AvailableMoney = waitingList.AvailableMoney - amount
 	db.DB.Save(&waitingList)
 }
+
+func UpdateUserAmountEndGame(userID, roomID int) {
+	// find user amount in waiting list and
+	// update money to "users" table
+	var waitingList db.WaitingList
+	db.DB.Where("room_id = ? AND user_id = ?", roomID, userID).First(&waitingList)
+
+	var user db.User
+	db.DB.Where("id = ?", userID).First(&user)
+
+	user.Money += waitingList.AvailableMoney
+	db.DB.Save(&user)
+}

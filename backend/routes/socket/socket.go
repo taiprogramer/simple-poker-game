@@ -192,6 +192,11 @@ func performActionPostHandler(userID, roomID int) {
 				roomRepo.IncreaseUserAmount(uid, roomID, sharedMoney)
 			}
 
+			// update players money
+			for uid := range userInRooms {
+				roomRepo.UpdateUserAmountEndGame(uid, roomID)
+			}
+
 			socket_mgmt.BroadcastMsgToRoom("the game has ended",
 				roomID)
 			return

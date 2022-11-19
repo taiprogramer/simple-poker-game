@@ -143,18 +143,32 @@ func createNewRoom(userID uint, private bool, password string, money int) (*Room
 		return &RoomSchemaResponse{}, false
 	}
 
-	// add room owner to waiting list
-	waitingList := db.WaitingList{
-		UserID:         userID,
-		AvailableMoney: money,
-		Ready:          true,
-		RoomID:         room.ID,
-	}
-
-	db.DB.Create(&waitingList)
-
 	var user db.User
 	db.DB.Where("id = ?", userID).First(&user)
+
+	// add room owner to waiting list
+	db.DB.Transaction(func(tx *gorm.DB) error {
+		waitingInfo := db.WaitingList{
+			UserID:         userID,
+			RoomID:         room.ID,
+			AvailableMoney: money,
+			Ready:          true,
+		}
+		if err := tx.Create(&waitingInfo).Error; err != nil {
+			return err
+		}
+		// subtract user's money in their profile
+		user.Money = user.Money - money
+		if err := tx.Save(&user).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	var waitingList db.WaitingList
+	db.DB.Where("room_id = ? AND user_id = ?", room.ID,
+		userID).First(&waitingList)
+
 	roomResponse := RoomSchemaResponse{
 		ID:      room.ID,
 		Code:    room.Code,
