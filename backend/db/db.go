@@ -140,6 +140,61 @@ type CombinationDetailsCard struct {
 	CombinationDetail   CombinationDetail `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;primaryKey;"`
 }
 
+func initCardsData(db *gorm.DB) {
+	for i := 1; i < 14; i++ {
+		c := Card{
+			Number: uint(i),
+			Suit:   Club,
+			Image:  "",
+		}
+		d := Card{
+			Number: uint(i),
+			Suit:   Diamond,
+			Image:  "",
+		}
+		s := Card{
+			Number: uint(i),
+			Suit:   Spade,
+			Image:  "",
+		}
+		h := Card{
+			Number: uint(i),
+			Suit:   Heart,
+			Image:  "",
+		}
+		db.Create(&c)
+		db.Create(&d)
+		db.Create(&s)
+		db.Create(&h)
+	}
+}
+
+func initActions(db *gorm.DB) {
+	actionNames := []string{"check", "call", "raise", "fold"}
+	var actions []Action
+
+	for _, actionName := range actionNames {
+		action := Action{
+			Name: actionName,
+		}
+		actions = append(actions, action)
+	}
+	db.CreateInBatches(actions, 4)
+}
+
+func initDefaultData(db *gorm.DB) {
+	// only init default data if it's empty
+	// init data for "cards"
+	var card Card
+	if db.First(&card).RowsAffected == 0 {
+		initCardsData(db)
+	}
+	var action Action
+	if db.First(&action).RowsAffected == 0 {
+		initActions(db)
+	}
+}
+
 var DB *gorm.DB
 
 func InitDB() error {
@@ -163,6 +218,10 @@ func InitDB() error {
 		dbConnection, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	}
 
+	if err != nil {
+		return errors.New("Can not connect to the database")
+	}
+
 	dbConnection.AutoMigrate(&User{})
 	dbConnection.AutoMigrate(&Action{})
 	dbConnection.AutoMigrate(&Combination{})
@@ -176,9 +235,8 @@ func InitDB() error {
 	dbConnection.AutoMigrate(&UsersTablesCombination{})
 	dbConnection.AutoMigrate(&CombinationDetailsCard{})
 
-	if err != nil {
-		return errors.New("Can not connect to the database")
-	}
+	initDefaultData(dbConnection)
+
 	DB = dbConnection
 	return nil
 }
