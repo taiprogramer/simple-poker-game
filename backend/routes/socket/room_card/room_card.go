@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	cardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/card"
+	cardRepo "backend/repo/card"
 )
 
 // each room will have available cards

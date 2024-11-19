@@ -1,6 +1,6 @@
 package room
 
-import "github.com/taiprogramer/simple-poker-game/backend/db"
+import "backend/db"
 
 func FindRoomByID(id int) (*db.Room, bool) {
 	var room db.Room

@@ -4,13 +4,14 @@ import (
 	"os"
 	"strconv"
 
+	"backend/constants"
+	"backend/db"
+	"backend/routes"
+	"backend/secure"
+
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/taiprogramer/simple-poker-game/backend/constants"
-	"github.com/taiprogramer/simple-poker-game/backend/db"
-	"github.com/taiprogramer/simple-poker-game/backend/routes"
-	"github.com/taiprogramer/simple-poker-game/backend/secure"
 )
 
 type UserAccountSignUpBody struct {

@@ -7,12 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"backend/db"
+	"backend/repo/bet_histories"
+
+	tableRepo "backend/repo/table"
+	"backend/routes"
+	"backend/secure"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/taiprogramer/simple-poker-game/backend/db"
-	"github.com/taiprogramer/simple-poker-game/backend/repo/bet_histories"
-	tableRepo "github.com/taiprogramer/simple-poker-game/backend/repo/table"
-	"github.com/taiprogramer/simple-poker-game/backend/routes"
-	"github.com/taiprogramer/simple-poker-game/backend/secure"
 	"gorm.io/gorm"
 )
 

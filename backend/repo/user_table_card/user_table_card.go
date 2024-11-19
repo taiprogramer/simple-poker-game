@@ -1,6 +1,6 @@
 package user_table_card
 
-import "github.com/taiprogramer/simple-poker-game/backend/db"
+import "backend/db"
 
 func AddNewCard(tableID, userID, cardID uint) {
 	userCard := db.UsersTablesCard{

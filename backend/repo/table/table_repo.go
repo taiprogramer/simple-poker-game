@@ -1,7 +1,7 @@
 package table
 
 import (
-	"github.com/taiprogramer/simple-poker-game/backend/db"
+	"backend/db"
 )
 
 func CreateNewTable(userID uint, roomID uint, round int, pot int, done bool) uint {

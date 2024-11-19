@@ -3,13 +3,15 @@ package main
 import (
 	"fmt"
 
+	"backend/db"
+
+	authRouter "backend/routes/auth"
+	roomRouter "backend/routes/room"
+	socketRouter "backend/routes/socket"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/joho/godotenv"
-	"github.com/taiprogramer/simple-poker-game/backend/db"
-	authRouter "github.com/taiprogramer/simple-poker-game/backend/routes/auth"
-	roomRouter "github.com/taiprogramer/simple-poker-game/backend/routes/room"
-	socketRouter "github.com/taiprogramer/simple-poker-game/backend/routes/socket"
 )
 
 func main() {

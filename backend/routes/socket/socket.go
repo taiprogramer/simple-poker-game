@@ -6,16 +6,20 @@ import (
 	"strconv"
 	"strings"
 
+	"backend/db"
+	betHistoryRepo "backend/repo/bet_histories"
+	cardRepo "backend/repo/card"
+	roomRepo "backend/repo/room"
+	tableRepo "backend/repo/table"
+
+	"backend/repo/user_table_card"
+
+	userTableCardRepo "backend/repo/user_table_card"
+
+	"backend/routes/socket/room_card"
+	"backend/routes/socket/socket_mgmt"
+
 	"github.com/gofiber/websocket/v2"
-	"github.com/taiprogramer/simple-poker-game/backend/db"
-	betHistoryRepo "github.com/taiprogramer/simple-poker-game/backend/repo/bet_histories"
-	cardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/card"
-	roomRepo "github.com/taiprogramer/simple-poker-game/backend/repo/room"
-	tableRepo "github.com/taiprogramer/simple-poker-game/backend/repo/table"
-	"github.com/taiprogramer/simple-poker-game/backend/repo/user_table_card"
-	userTableCardRepo "github.com/taiprogramer/simple-poker-game/backend/repo/user_table_card"
-	"github.com/taiprogramer/simple-poker-game/backend/routes/socket/room_card"
-	"github.com/taiprogramer/simple-poker-game/backend/routes/socket/socket_mgmt"
 )
 
 // map userID to roomID

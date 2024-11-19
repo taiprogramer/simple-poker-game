@@ -1,6 +1,6 @@
 package bet_histories
 
-import "github.com/taiprogramer/simple-poker-game/backend/db"
+import "backend/db"
 
 func WriteBetHistory(tableID, userID, actionID, amount int, round int) {
 	betHistory := db.BetHistory{
