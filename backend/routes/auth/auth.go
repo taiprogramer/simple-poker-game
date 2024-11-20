@@ -9,9 +9,9 @@ import (
 	"backend/routes"
 	"backend/secure"
 
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
-	jwtware "github.com/gofiber/jwt/v3"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type UserAccountSignUpBody struct {
@@ -33,7 +33,7 @@ type SignInSuccessResponse struct {
 // Bearer Token Authorization Middleware (JWT)
 func JWTMiddleWare() func(*fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
-		SigningKey: []byte(os.Getenv("HMAC_SECRET_KEY")),
+		SigningKey: jwtware.SigningKey{Key: []byte(os.Getenv("HMAC_SECRET_KEY"))},
 		ContextKey: "token",
 	})
 }
