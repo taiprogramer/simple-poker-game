@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_poker_game/pages/room_texas_holdem_page.dart';
 import 'package:simple_poker_game/pages/texas_holdem_page.dart';
 import 'package:simple_poker_game/services/config.dart';
+import 'package:localstorage/localstorage.dart';
 
 import 'pages/setting_page.dart';
 import 'pages/home_page.dart';
@@ -34,6 +35,7 @@ Future init() async {
       int.parse(dotenv.env['API_SERVER_PORT'] ?? '1975');
   serviceConfig.setHost(host);
   serviceConfig.setPort(port);
+  await initLocalStorage();
 }
 
 class MyApp extends StatelessWidget {

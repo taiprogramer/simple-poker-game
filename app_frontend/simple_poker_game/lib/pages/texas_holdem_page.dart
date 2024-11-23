@@ -37,7 +37,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
   }
 
   void _updateUserState() async {
-    int userID = AppLocalStorage.getItem('user_id');
+    int userID = int.parse(AppLocalStorage.getItem('user_id'));
     final userData = await AuthService.getUser(userID);
     setState(() {
       user = userData;
@@ -51,30 +51,30 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
   }
 
   _onSliderChangedEndHandler(double value) async {
-    await AppLocalStorage.setItem('amount', value);
+    AppLocalStorage.setItem('amount', value);
   }
 
   _newRoom() async {
     try {
-      double amount = AppLocalStorage.getItem('amount');
+      double amount = double.parse(AppLocalStorage.getItem('amount'));
       int intAmount = amount.toInt();
       if (intAmount == 0) {
         return;
       }
       final room = await RoomService.newRoom(userID: user.id, money: intAmount);
-      await AppLocalStorage.setItem('room_id', room.id);
+      AppLocalStorage.setItem('room_id', room.id);
       Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
     } catch (_) {}
   }
 
   _joinRoom() async {
-    double amount = AppLocalStorage.getItem('amount');
+    double amount = double.parse(AppLocalStorage.getItem('amount'));
     int intAmount = amount.toInt();
     if (intAmount == 0) {
       return;
     }
-    final roomID = AppLocalStorage.getItem("room_id");
-    final userID = AppLocalStorage.getItem('user_id');
+    final roomID = int.parse(AppLocalStorage.getItem("room_id"));
+    final userID = int.parse(AppLocalStorage.getItem('user_id'));
     await RoomService.joinRoom(roomID: roomID, userID: userID);
     Navigator.pushNamed(context, RoomTexasHoldemPage.routeName);
   }
@@ -95,7 +95,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
           BasicDialogAction(
             title: const Text('Cancel'),
             onPressed: () async {
-              await AppLocalStorage.setItem('amount', 0.0);
+              AppLocalStorage.setItem('amount', 0.0);
               Navigator.pop(context);
             },
           ),
@@ -104,7 +104,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
             onPressed: () async {
               Navigator.pop(context);
               runWhenGo();
-              await AppLocalStorage.setItem('amount', 0.0);
+              AppLocalStorage.setItem('amount', 0.0);
             },
           ),
         ],
@@ -113,7 +113,7 @@ class _TexasHoldemPageState extends State<TexasHoldemPage> {
   }
 
   _onTap(BuildContext context, int roomID) async {
-    await AppLocalStorage.setItem("room_id", roomID);
+    AppLocalStorage.setItem("room_id", roomID);
     _showAskingMoneyDialog(context, _joinRoom);
   }
 

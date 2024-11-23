@@ -1,8 +1,8 @@
 import 'package:localstorage/localstorage.dart';
 
 class AppLocalStorage {
-  static Future<void> setItem(String key, dynamic value) async {
-    localStorage.setItem(key, value);
+  static void setItem(String key, dynamic value) {
+    localStorage.setItem(key, value.toString());
   }
 
   static dynamic getItem(String key) {

@@ -50,14 +50,14 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   PokerTable table = PokerTable(currentTurn: UserTurn());
   List<Chat> chatMessages = List.empty(growable: true);
 
-  final int userID = AppLocalStorage.getItem("user_id");
-  final int roomID = AppLocalStorage.getItem("room_id");
+  final int userID = int.parse(AppLocalStorage.getItem("user_id"));
+  final int roomID = int.parse(AppLocalStorage.getItem("room_id"));
 
   late SocketInstance socketInstance;
 
   Future<void> _refreshRoomState() async {
-    final roomData =
-        await RoomService.getRoom(roomID: AppLocalStorage.getItem('room_id'));
+    final roomData = await RoomService.getRoom(
+        roomID: int.parse(AppLocalStorage.getItem('room_id')));
     late final bool readyStatus;
     for (final user in roomData.users) {
       if (user.id == userID) {
@@ -88,12 +88,14 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
     if (msg.startsWith("table=")) {
       final tableIDStr = msg.substring(msg.indexOf("=") + 1);
       tableID = int.parse(tableIDStr);
-      _refreshTableAndRoomState(tableID, AppLocalStorage.getItem('room_id'));
+      _refreshTableAndRoomState(
+          tableID, int.parse(AppLocalStorage.getItem('room_id')));
     }
 
     if (msg == "the game has ended") {
       endGame = true;
-      _refreshTableAndRoomState(tableID, AppLocalStorage.getItem('room_id'));
+      _refreshTableAndRoomState(
+          tableID, int.parse(AppLocalStorage.getItem('room_id')));
     }
 
     if (msg.startsWith("broadcast=")) {
@@ -115,8 +117,8 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   }
 
   void _connectWebSocket() {
-    final userID = AppLocalStorage.getItem("user_id");
-    final roomID = AppLocalStorage.getItem('room_id');
+    final userID = int.parse(AppLocalStorage.getItem("user_id"));
+    final roomID = int.parse(AppLocalStorage.getItem('room_id'));
     socketInstance = SocketInstance(userID: userID, roomID: roomID);
     socketInstance.connect();
     socketInstance.listen(_socketListener);
@@ -169,7 +171,7 @@ class _RoomTexasHoldemPageState extends State<RoomTexasHoldemPage> {
   Widget _playerInSlot({int slot = -1}) {
     // because slot count from 1 except current sign-in user slot is 0.
     final index = slot == 0 ? 0 : slot - 1;
-    final userID = AppLocalStorage.getItem('user_id');
+    final userID = int.parse(AppLocalStorage.getItem('user_id'));
     String card1ImageUrl = room.playing ? _getBackCardImageUrl() : '';
     String card2ImageUrl = room.playing ? _getBackCardImageUrl() : '';
     int amount = 0;
